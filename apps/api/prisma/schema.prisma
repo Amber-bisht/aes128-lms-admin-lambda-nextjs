@@ -1,0 +1,52 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  imageUrl    String?   @map("image_url")
+  lectures    Lecture[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Lecture {
+  id        String   @id @default(uuid())
+  title     String
+  videoUrl  String?  @map("video_url") // URL to the .m3u8 playlist
+  
+  // Encryption Details for Custom Decryption
+  encryptionKey String?  @map("encryption_key") // Hex-encoded AES-128 key
+  iv            String?  // Hex-encoded Initialization Vector
+
+  courseId  String   @map("course_id")
+  course    Course   @relation(fields: [courseId], references: [id])
+  
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

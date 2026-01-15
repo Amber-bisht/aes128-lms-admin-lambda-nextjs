@@ -1,0 +1,1 @@
+{"name": "lms-monorepo", "private": true, "workspaces": ["apps/*", "packages/*"]}

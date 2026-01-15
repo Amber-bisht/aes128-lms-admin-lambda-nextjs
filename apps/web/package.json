@@ -1,0 +1,32 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "framer-motion": "^12.26.2",
+    "hls.js": "^1.6.15",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.2",
+    "next-auth": "^4.24.13",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.2",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5"
+  }
+}

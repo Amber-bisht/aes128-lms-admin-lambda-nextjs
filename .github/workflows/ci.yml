@@ -1,0 +1,61 @@
+
+name: LMS CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # --- Database Setup (Mock or Dev) ---
+      # In a real pipeline, you might spin up a localized Postgres container
+      # or generate the client against a schema without connecting.
+      - name: Generate Prisma Client
+        run: |
+          cd apps/api
+          npx prisma generate
+
+      # --- Build API ---
+      - name: Build API
+        run: |
+          cd apps/api
+          npx tsc
+
+      # --- Build Video Processor ---
+      - name: Build Video Processor
+        run: |
+          cd apps/video-processor
+          npx tsc
+
+      # --- Build Frontend ---
+      - name: Build Frontend (Next.js)
+        run: |
+          cd apps/web
+          # Disable linting during build to speed up, or enable if strict
+          npm run build
+        env:
+          # Mock env vars needed for Next.js build time
+          NEXT_PUBLIC_API_URL: http://localhost:4000
+          GOOGLE_CLIENT_ID: mock_id
+          GOOGLE_CLIENT_SECRET: mock_secret
+          NEXTAUTH_SECRET: mock_secret
