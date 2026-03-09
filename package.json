@@ -1,1 +1,15 @@
-{"name": "lms-monorepo", "private": true, "workspaces": ["apps/*", "packages/*"]}
+{
+    "name": "lms-monorepo",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "concurrently \"npm run dev --workspace=web\" \"npm run dev --workspace=api\"",
+        "install:all": "npm install && npm install --workspace=web && npm install --workspace=api"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

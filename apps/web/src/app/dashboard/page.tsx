@@ -25,7 +25,7 @@ export default function Dashboard() {
     }, [session]);
 
     return (
-        <div className="container py-10">
+        <div className="max-w-[1200px] mx-auto px-6 py-10">
             <h1 className="text-3xl font-bold mb-8">My Courses</h1>
 
             <div className="grid-cols-auto">
