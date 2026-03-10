@@ -3,11 +3,16 @@ import Link from "next/link";
 import { Star, Globe, Clock, ChevronRight } from "lucide-react";
 
 async function getCourses() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
-        next: { revalidate: 3600 }
-    });
-    if (!res.ok) return [];
-    return res.json();
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
+            next: { revalidate: 3600 }
+        });
+        if (!res.ok) return [];
+        return res.json();
+    } catch (error) {
+        console.warn("Failed to fetch courses during build/runtime.", error);
+        return [];
+    }
 }
 
 export default async function CoursesPage() {
