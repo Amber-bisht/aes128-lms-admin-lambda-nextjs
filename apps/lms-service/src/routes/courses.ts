@@ -7,11 +7,15 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // All routes require login
-router.use(authenticateJWT);
+import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
+
+// GET all active courses - Public
 router.get('/', async (req: Request, res: Response) => {
     try {
         const courses = await prisma.course.findMany({
+            where: { active: true },
             orderBy: { createdAt: 'desc' }
         });
         res.json(courses);
@@ -20,9 +24,22 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 
+// GET course by ID or Slug - Optional Auth
 router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const authHeader = req.headers.authorization;
+    let userId: string | null = null;
+
+    // Optional JWT verification
+    if (authHeader) {
+        try {
+            const token = authHeader.split(' ')[1];
+            const decoded: any = jwt.verify(token, JWT_SECRET);
+            userId = decoded.id;
+        } catch (e) {
+            // Invalid token, treat as public
+        }
+    }
 
     try {
         const course = await prisma.course.findFirst({
@@ -33,10 +50,6 @@ router.get('/:id', async (req: Request, res: Response) => {
                 ]
             },
             include: {
-                users: {
-                    where: { id: userId },
-                    select: { id: true }
-                },
                 lectures: {
                     orderBy: { order: 'asc' },
                     select: {
@@ -50,9 +63,19 @@ router.get('/:id', async (req: Request, res: Response) => {
 
         if (!course) return res.status(404).json({ error: 'Course not found' });
 
-        const isPurchased = course.users.length > 0;
+        // Check if user is enrolled or is admin
+        let isPurchased = false;
+        if (userId) {
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    courses: { where: { id: course.id } }
+                }
+            });
+            isPurchased = (user?.courses.length || 0) > 0 || user?.role === 'ADMIN';
+        }
 
-        // If purchased, fetch full lecture details
+        // If purchased, fetch full lecture details (with video URLs)
         if (isPurchased) {
             const fullLectures = await prisma.lecture.findMany({
                 where: { courseId: course.id },
@@ -62,8 +85,9 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         // If not purchased, return limited details
-        res.json({ ...course, users: undefined, purchased: false });
+        res.json({ ...course, purchased: false });
     } catch (error) {
+        console.error('Fetch Course Error:', error);
         res.status(500).json({ error: 'Failed to fetch course' });
     }
 });
