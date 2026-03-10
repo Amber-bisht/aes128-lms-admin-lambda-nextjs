@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { PlusCircle, Video, BookOpen, Loader2 } from "lucide-react";
+import { PlusCircle, Video, BookOpen, Loader2, Users } from "lucide-react";
 
 export default function AdminDashboard() {
     const { data: session, status } = useSession();
@@ -94,6 +94,18 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 </div>
+
+                <Link href="/admin/users" className="p-8 bg-white/5 border border-white/10 rounded-3xl hover:border-white/20 transition-all group">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center group-hover:border-white/20 transition-all">
+                            <Users className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Total Users</p>
+                            <h3 className="text-3xl font-black text-white">Manage</h3>
+                        </div>
+                    </div>
+                </Link>
             </div>
 
             {courses.length === 0 ? (
@@ -157,7 +169,8 @@ export default function AdminDashboard() {
                         </Link>
                     ))}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

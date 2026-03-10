@@ -30,6 +30,28 @@ router.get('/courses/:id', async (req: Request, res: Response) => {
     res.json(course);
 });
 
+// GET /admin/courses/:id/full - Detailed fetch with lectures and assets
+router.get('/courses/:id/full', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const course = await prisma.course.findFirst({
+        where: {
+            OR: [
+                { id: id as string },
+                { slug: id as string }
+            ]
+        },
+        include: {
+            lectures: {
+                orderBy: { order: 'asc' },
+                include: { videoAsset: true }
+            }
+        }
+    });
+
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    res.json(course);
+});
+
 // Create Course
 router.post('/courses', async (req: Request, res: Response) => {
     const { title, description, imageUrl, price, slug, active } = req.body;
@@ -89,17 +111,17 @@ router.put('/courses/:id', async (req: Request, res: Response) => {
 // Add Lecture to Course
 router.post('/courses/:courseId/lectures', async (req: Request, res: Response) => {
     const { courseId } = req.params;
-    const { title, videoUrl, order } = req.body; // videoUrl here implies the processed URL or raw? 
-    // Actually, usually we start with raw upload, then processing updates it.
-    // But for simplicity, we might create the lecture entry first with status pending.
+    const { title, videoUrl, order, section, description } = req.body;
 
     try {
         const lecture = await prisma.lecture.create({
             data: {
                 title,
+                section,
+                description,
                 courseId: courseId as string,
                 order: order || 0,
-                // videoUrl might be empty initially until processed
+                videoUrl: videoUrl || "",
             }
         });
         res.json(lecture);
@@ -151,6 +173,118 @@ router.post('/upload-image', upload.single('file'), async (req: Request, res: Re
     } catch (error) {
         console.error('Sharp/S3 Upload Error:', error);
         res.status(500).json({ error: 'Failed to process and upload image' });
+    }
+});
+
+// Get All Users and their Enrollments
+router.get('/users', async (req: Request, res: Response) => {
+    try {
+        const users = await prisma.user.findMany({
+            include: {
+                courses: {
+                    select: {
+                        id: true,
+                        title: true,
+                        slug: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(users);
+    } catch (error) {
+        console.error('Fetch Users Error:', error);
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+
+// Update Lecture
+router.patch('/lectures/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { title, description, section, order, videoAssetId, videoUrl } = req.body;
+
+    try {
+        const lecture = await prisma.lecture.update({
+            where: { id: id as string },
+            data: {
+                title,
+                description,
+                section,
+                order,
+                videoAssetId,
+                videoUrl
+            },
+            include: { videoAsset: true }
+        });
+        res.json(lecture);
+    } catch (error) {
+        console.error('Update Lecture Error:', error);
+        res.status(500).json({ error: 'Failed to update lecture' });
+    }
+});
+
+// Delete Lecture
+router.delete('/lectures/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        await prisma.lecture.delete({ where: { id: id as string } });
+        res.json({ message: 'Lecture deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete lecture' });
+    }
+});
+
+// GET /admin/videos - Fetch available video assets
+router.get('/videos', async (req: Request, res: Response) => {
+    try {
+        const assets = await prisma.videoAsset.findMany({
+            where: { lecture: null },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(assets);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch video assets' });
+    }
+});
+
+// POST /admin/videos/complete - Lambda Callback
+router.post('/videos/complete', async (req: Request, res: Response) => {
+    const { videoUrl, encryptionKey, iv, name, videoId } = req.body;
+
+    try {
+        const asset = await prisma.videoAsset.create({
+            data: {
+                id: videoId || uuidv4(),
+                name: name || "Processed Video",
+                videoUrl,
+                encryptionKey,
+                iv
+            }
+        });
+        res.json(asset);
+    } catch (error) {
+        console.error('Video Complete Error:', error);
+        res.status(500).json({ error: 'Failed to record video asset' });
+    }
+});
+
+// Bulk Reorder Lectures
+router.put('/lectures/reorder', async (req: Request, res: Response) => {
+    const { lectures } = req.body; // Array of { id: string, order: number }
+
+    try {
+        await prisma.$transaction(
+            lectures.map((l: any) =>
+                prisma.lecture.update({
+                    where: { id: l.id },
+                    data: { order: l.order }
+                })
+            )
+        );
+        res.json({ message: 'Order updated successfully' });
+    } catch (error) {
+        console.error('Reorder Error:', error);
+        res.status(500).json({ error: 'Failed to reorder lectures' });
     }
 });
 

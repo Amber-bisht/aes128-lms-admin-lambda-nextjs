@@ -45,10 +45,14 @@ model Lecture {
   section   String?  // Grouping heading (e.g., "Introduction")
   description String? @db.Text // Markdown content
   videoUrl  String?  @map("video_url")
+  imageUrl  String?  @map("image_url")
   
   // Encryption Details for Custom Decryption
   encryptionKey String?  @map("encryption_key") // Hex-encoded AES-128 key
   iv            String?  // Hex-encoded Initialization Vector
+
+  videoAssetId String?     @unique @map("video_asset_id")
+  videoAsset   VideoAsset? @relation(fields: [videoAssetId], references: [id])
 
   courseId  String   @map("course_id")
   course    Course   @relation(fields: [courseId], references: [id])
@@ -56,4 +60,14 @@ model Lecture {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model VideoAsset {
+  id            String   @id @default(uuid())
+  name          String?  // Original filename or title
+  videoUrl      String   @map("video_url")
+  encryptionKey String?  @map("encryption_key")
+  iv            String?
+  lecture       Lecture?
+  createdAt     DateTime @default(now())
 }
