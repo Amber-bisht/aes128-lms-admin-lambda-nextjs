@@ -1,0 +1,92 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: eu-west-1                   # set this to your preferred AWS region, e.g. us-east-1
+  ECR_REPOSITORY_API: lms-api           # set this to your Amazon ECR repository name
+  ECR_REPOSITORY_WEB: lms-web           # set this to your Amazon ECR repository name
+  ECS_SERVICE_API: lms-api-service      # set this to your Amazon ECS service name
+  ECS_SERVICE_WEB: lms-web-service      # set this to your Amazon ECS service name
+  ECS_CLUSTER: lms-cluster-production   # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION_API: .aws/lms-api-task-definition.json # set this to the path to your Amazon ECS task definition
+  ECS_TASK_DEFINITION_WEB: .aws/lms-web-task-definition.json # set this to the path to your Amazon ECS task definition
+  CONTAINER_NAME_API: lms-api           # set this to the name of the container in the
+  CONTAINER_NAME_WEB: lms-web           # set this to the name of the container in the
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push API image to Amazon ECR
+      id: build-image-api
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_API:latest apps/lms-service
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Build, tag, and push WEB image to Amazon ECR
+      id: build-image-web
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} -t $ECR_REGISTRY/$ECR_REPOSITORY_WEB:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_WEB:latest apps/web
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_WEB:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_WEB:latest
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_WEB:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Fill in the new image ID in the Amazon ECS task definition for API
+      id: task-def-api
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION_API }}
+        container-name: ${{ env.CONTAINER_NAME_API }}
+        image: ${{ steps.build-image-api.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition for API
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: ${{ steps.task-def-api.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE_API }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
+
+    - name: Fill in the new image ID in the Amazon ECS task definition for WEB
+      id: task-def-web
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION_WEB }}
+        container-name: ${{ env.CONTAINER_NAME_WEB }}
+        image: ${{ steps.build-image-web.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition for WEB
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: ${{ steps.task-def-web.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE_WEB }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true

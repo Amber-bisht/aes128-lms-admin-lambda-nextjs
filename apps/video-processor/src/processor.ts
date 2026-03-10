@@ -17,26 +17,28 @@ export const processVideo = async (fileKey: string, videoId: string): Promise<{ 
     const outputPath = path.join(workDir, 'output.m3u8');
 
     // 1. Download Input
-    console.log('Downloading input...');
-    // Mock for build: await downloadFromS3(fileKey, inputPath); 
+    console.log(`Downloading input from ${process.env.S3_BUCKET_RAW}/${fileKey}...`);
+    const downloadParams = { Bucket: process.env.S3_BUCKET_RAW, Key: fileKey };
+    const { Body } = await s3.send(new GetObjectCommand(downloadParams));
+    if (!Body) throw new Error('Failed to download from S3');
+
+    const fileStream = fs.createWriteStream(inputPath);
+    await new Promise((resolve, reject) => {
+        (Body as any).pipe(fileStream).on('finish', resolve).on('error', reject);
+    });
 
     // 2. Generate Encryption Key & IV
     const key = crypto.randomBytes(16);
     const iv = crypto.randomBytes(16).toString('hex');
-
-    // Save Key to file
     fs.writeFileSync(keyPath, key);
 
-    // Create Key Info File
-    // Format: Key URI (API endpoint), Key File Path, IV (Optional)
-    // Format: Key URI (API endpoint), Key File Path, IV (Optional)
-    const apiBase = process.env.API_URL || 'http://localhost:4000';
+    const apiBase = process.env.API_URL;
     const keyUrl = `${apiBase}/api/videos/${videoId}/key`;
     fs.writeFileSync(keyInfoPath, `${keyUrl}\n${keyPath}\n${iv}`);
 
-    // 3. Transcode & Encrypt (Mocking the ffmpeg structure to be valid TS, logic is same)
+    // 3. Transcode & Encrypt
     console.log('Starting FFmpeg...');
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         ffmpeg(inputPath)
             .outputOptions([
                 '-hls_time 10',
@@ -44,16 +46,27 @@ export const processVideo = async (fileKey: string, videoId: string): Promise<{ 
                 `-hls_key_info_file ${keyInfoPath}`,
             ])
             .output(outputPath)
-            .on('end', async () => {
-                console.log('FFmpeg finished.');
-
-                resolve({
-                    key: key.toString('hex'),
-                    iv,
-                    playlistUrl: `https://${process.env.S3_BUCKET_PUBLIC}.s3.amazonaws.com/videos/${videoId}/output.m3u8`
-                });
-            })
+            .on('end', resolve)
             .on('error', (err) => reject(err))
             .run();
     });
+
+    // 4. Upload HLS segments to Public Bucket
+    console.log('Uploading HLS segments...');
+    const hlsFiles = fs.readdirSync(workDir).filter(f => f.endsWith('.m3u8') || f.endsWith('.ts'));
+    for (const file of hlsFiles) {
+        const fileContent = fs.readFileSync(path.join(workDir, file));
+        await s3.send(new PutObjectCommand({
+            Bucket: process.env.S3_BUCKET_PUBLIC,
+            Key: `videos/${videoId}/${file}`,
+            Body: fileContent,
+            ContentType: file.endsWith('.m3u8') ? 'application/vnd.apple.mpegurl' : 'video/mp2t'
+        }));
+    }
+
+    return {
+        key: key.toString('hex'),
+        iv,
+        playlistUrl: `https://${process.env.S3_BUCKET_PUBLIC}.s3.amazonaws.com/videos/${videoId}/output.m3u8`
+    };
 };

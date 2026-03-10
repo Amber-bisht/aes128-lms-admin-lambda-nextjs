@@ -12,29 +12,33 @@ export const handler = async (event: any) => {
 
     try {
         // 1. Parse S3 Event
-        // const record = event.Records[0];
-        // const bucket = record.s3.bucket.name;
-        // const key = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
+        const record = event.Records[0];
+        const bucket = record.s3.bucket.name;
+        const key = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
 
-        // Mock Data for demonstration
-        const key = "raw/sample-video.mp4";
-        // We'd parse the videoId from the filename or metadata
-        const videoId = "some-uuid-from-upload";
+        console.log(`Processing file from bucket: ${bucket}, key: ${key}`);
+
+        // Extract videoId/lectureId from key (e.g., "lecture-videos/UUID.mp4")
+        const videoId = key.split('/').pop()?.split('.')[0];
+        if (!videoId) throw new Error("Could not extract videoId from key");
 
         // 2. Process Video (Transcode + Generate Unique Keys)
         const result = await processVideo(key, videoId);
 
         console.log("Processing complete. Updating DB...", result);
 
-        // 3. Update Main API (or DB directly) with Keys
-        const apiBase = process.env.API_URL || 'http://localhost:4000';
-        const apiResponse = await fetch(`${apiBase}/admin/courses/lectures/${videoId}/complete`, {
+        // 3. Update Main API with Keys
+        const apiBase = process.env.API_URL;
+        if (!apiBase) throw new Error("API_URL environment variable is not set");
+
+        const apiResponse = await fetch(`${apiBase}/admin/videos/complete`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${process.env.ADMIN_SERVICE_TOKEN}`
             },
             body: JSON.stringify({
+                videoId: videoId,
                 videoUrl: result.playlistUrl,
                 encryptionKey: result.key, // Unique Hex Key
                 iv: result.iv             // Unique Hex VI

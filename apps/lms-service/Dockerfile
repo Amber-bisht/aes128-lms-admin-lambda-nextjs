@@ -1,36 +1,38 @@
+# Base image
+FROM node:20-alpine AS base
 
-# Base stage
-FROM node:18-alpine AS base
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-# Builder stage
+# Copy root package files for monorepo context if needed, 
+# but for a simple build we can just copy the app's package.json
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-# Copy root package.json and lockfile (if existing)
-COPY package*.json ./
-# Copy workspace packages
-COPY apps/api/package*.json ./apps/api/
-# Install dependencies
-RUN npm install
-# Copy source code
-COPY apps/api ./apps/api
-# Build API
-WORKDIR /app/apps/api
-RUN npx prisma generate
-RUN npx tsc
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
-# Production stage
+# Generate Prisma Client
+RUN npx prisma generate
+
+RUN npm run build
+
+# Production image, copy all the files and run node
 FROM base AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
 
-# Copy necessary files
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
-COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
 
-WORKDIR /app/apps/api
 EXPOSE 4000
 
 CMD ["node", "dist/index.js"]

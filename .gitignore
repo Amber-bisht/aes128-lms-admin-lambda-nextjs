@@ -4,3 +4,4 @@ node_modules
 hosting.md
 public_key.pem
 private_key.pem
+git.env
