@@ -1,0 +1,27 @@
+{
+    "name": "gateway",
+    "version": "1.0.0",
+    "description": "API Gateway for LMS Microservices",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "nodemon src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.3",
+        "express": "^5.2.1",
+        "http-proxy-middleware": "^3.0.3",
+        "jsonwebtoken": "^9.0.3"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^25.0.8",
+        "nodemon": "^3.1.11",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    }
+}

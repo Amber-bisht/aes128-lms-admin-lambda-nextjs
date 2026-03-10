@@ -28,25 +28,34 @@ export default function Dashboard() {
         <div className="max-w-[1200px] mx-auto px-6 py-10">
             <h1 className="text-3xl font-bold mb-8">My Courses</h1>
 
-            <div className="grid-cols-auto">
-                {courses.map(course => (
-                    <Link href={`/course/${course.id}`} key={course.id} className="block group">
-                        <div className="glass-card h-full overflow-hidden hover:border-blue-500/50 transition-colors p-0">
-                            <div className="aspect-video bg-gray-800 relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {courses.filter(c => c.active).map(course => (
+                    <Link href={`/course/${course.slug}`} key={course.id} className="group">
+                        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-white/20 transition-all backdrop-blur-md flex flex-col h-full">
+                            <div className="aspect-video relative overflow-hidden bg-white/5">
                                 {course.imageUrl ? (
-                                    <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover" />
+                                    <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                        No Image
+                                    <div className="w-full h-full flex items-center justify-center text-gray-600">
+                                        <Play className="w-12 h-12 opacity-20" />
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Play className="w-12 h-12 text-white fill-white" />
                                 </div>
+                                <div className="absolute bottom-4 right-4 bg-black/50 border border-white/10 backdrop-blur-md rounded-lg px-3 py-1">
+                                    <span className="text-[10px] font-black text-white">₹{course.price}</span>
+                                </div>
                             </div>
-                            <div className="p-4">
-                                <h3 className="font-bold text-lg mb-2">{course.title}</h3>
-                                <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                            <div className="p-8 flex-1 flex flex-col">
+                                <h3 className="text-xl font-black uppercase tracking-tight text-white mb-2 line-clamp-1">{course.title}</h3>
+                                <p className="text-sm text-gray-400 font-medium line-clamp-2 mb-6 flex-1 italic">
+                                    {course.description || "No description provided."}
+                                </p>
+                                <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{course.lectures?.length || 0} Lectures</span>
+                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Premium Access</span>
+                                </div>
                             </div>
                         </div>
                     </Link>

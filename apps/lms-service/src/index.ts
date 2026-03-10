@@ -24,7 +24,7 @@ app.use('/courses', courseRoutes);
 app.use('/api/videos', videoRoutes); // Match the path used in processor.ts
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', service: 'api' });
+    res.json({ status: 'ok', service: 'lms-service' });
 });
 
 app.listen(PORT, () => {

@@ -1,0 +1,32 @@
+{
+    "name": "student-service",
+    "version": "1.0.0",
+    "description": "Student and Payment Service for LMS",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "nodemon src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "prisma:generate": "prisma generate"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.22.0",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.3",
+        "express": "^5.2.1",
+        "jsonwebtoken": "^9.0.3",
+        "razorpay": "^2.9.6",
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^25.0.8",
+        "@types/uuid": "^10.0.0",
+        "nodemon": "^3.1.11",
+        "prisma": "^5.22.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    }
+}

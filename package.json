@@ -6,8 +6,8 @@
         "packages/*"
     ],
     "scripts": {
-        "dev": "concurrently \"npm run dev --workspace=web\" \"npm run dev --workspace=api\"",
-        "install:all": "npm install && npm install --workspace=web && npm install --workspace=api"
+        "dev": "concurrently \"npm run dev --workspace=web\" \"npm run dev --workspace=lms-service\" \"npm run dev --workspace=gateway\" \"npm run dev --workspace=student-service\"",
+        "install:all": "npm install && npm install --workspace=web && npm install --workspace=lms-service && npm install --workspace=gateway && npm install --workspace=student-service"
     },
     "devDependencies": {
         "concurrently": "^8.2.2"

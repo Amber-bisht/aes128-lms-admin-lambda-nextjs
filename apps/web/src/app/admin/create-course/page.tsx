@@ -3,12 +3,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Upload } from "lucide-react";
 
 export default function CreateCourse() {
+    const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
+    const [active, setActive] = useState(true);
+
+    const isAdmin = (session?.user as any)?.role === 'ADMIN';
+
+    if (status === "loading") return null;
+
+    if (!isAdmin) {
+        return (
+            <div className="max-w-[1200px] mx-auto px-6 py-32 text-center">
+                <h1 className="text-4xl font-black mb-4">Access Denied</h1>
+                <p className="text-gray-400">You do not have permission to view this page.</p>
+                <Link href="/" className="inline-block mt-8 text-sm font-bold text-white hover:underline underline-offset-4">
+                    Return Home
+                </Link>
+            </div>
+        );
+    }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -16,35 +36,31 @@ export default function CreateCourse() {
 
         const formData = new FormData(e.currentTarget);
         const title = formData.get("title") as string;
+        const slug = formData.get("slug") as string;
         const description = formData.get("description") as string;
+        const price = formData.get("price") as string;
 
         try {
             let imageUrl = "";
 
-            // 1. Upload Image if present
+            // 1. Upload Image to Backend (which then uploads to S3)
             if (file) {
-                // Get Presigned URL
-                const urlRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload-url`, {
+                const uploadData = new FormData();
+                uploadData.append("file", file);
+                uploadData.append("type", "course-image");
+
+                const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload-image`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        filename: file.name,
-                        contentType: file.type,
-                        type: "course-image"
-                    })
-                });
-                const { url, key } = await urlRes.json();
-
-                // Upload to S3
-                await fetch(url, {
-                    method: "PUT",
-                    body: file,
-                    headers: { "Content-Type": file.type }
+                    headers: {
+                        "Authorization": `Bearer ${(session as any).appToken}`
+                    },
+                    body: uploadData
                 });
 
-                // Construct Public URL (Assuming public bucket or generic access)
-                // For now, we store the Key or a mocked public URL
-                imageUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_PUBLIC}.s3.amazonaws.com/${key}`;
+                if (!uploadRes.ok) throw new Error("Failed to upload image");
+
+                const data = await uploadRes.json();
+                imageUrl = data.imageUrl;
             }
 
             // 2. Create Course in Backend
@@ -52,9 +68,9 @@ export default function CreateCourse() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    // Add Auth Token here (from session)
+                    "Authorization": `Bearer ${(session as any).appToken}`
                 },
-                body: JSON.stringify({ title, description, imageUrl })
+                body: JSON.stringify({ title, slug, description, imageUrl, price, active })
             });
 
             if (res.ok) {
@@ -70,51 +86,99 @@ export default function CreateCourse() {
     }
 
     return (
-        <div className="container py-10 max-w-2xl">
-            <h1 className="text-3xl font-bold mb-8">Create New Course</h1>
+        <div className="max-w-2xl mx-auto px-6 py-20">
+            <h1 className="text-5xl font-black tracking-tight mb-12 uppercase text-center">Create Course</h1>
 
-            <form onSubmit={handleSubmit} className="glass-card space-y-6">
+            <form onSubmit={handleSubmit} className="p-8 md:p-12 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-8 backdrop-blur-md relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
                 <div>
-                    <label className="block text-sm font-medium mb-2">Course Title</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Course Title</label>
                     <input
                         name="title"
                         required
-                        className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:outline-none focus:border-blue-500 transition-colors"
-                        placeholder="e.g. Advanced System Design"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
+                        placeholder="e.g. 100x Full Stack Development"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-2">Description</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Course Slug</label>
+                    <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold px-1 py-0.5 bg-white/5 rounded text-[8px] tracking-tighter uppercase">URL</span>
+                        <input
+                            name="slug"
+                            required
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-12 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
+                            placeholder="e.g. full-stack-bootcamp"
+                        />
+                    </div>
+                    <p className="text-[9px] text-gray-600 mt-2 uppercase tracking-tight font-bold ml-1">SEO friendly identifier for the course URL</p>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Description</label>
                     <textarea
                         name="description"
-                        className="w-full bg-black/20 border border-white/10 rounded-lg p-3 h-32 focus:outline-none focus:border-blue-500 transition-colors"
-                        placeholder="Course details..."
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 h-40 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium resize-none"
+                        placeholder="What will students learn in this premium curriculum?"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-2">Cover Image</label>
-                    <div className="border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:border-blue-500/50 transition-colors cursor-pointer relative">
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Pricing (INR)</label>
+                    <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                        <input
+                            name="price"
+                            type="number"
+                            required
+                            min="0"
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-10 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
+                            placeholder="0.00"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Cover Image</label>
+                    <div className="border-2 border-dashed border-white/5 rounded-[2rem] p-12 text-center hover:border-white/10 hover:bg-white/[0.02] transition-all cursor-pointer relative group/upload">
                         <input
                             type="file"
                             accept="image/*"
                             className="absolute inset-0 opacity-0 cursor-pointer"
                             onChange={(e) => setFile(e.target.files?.[0] || null)}
                         />
-                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                            {file ? file.name : "Click to upload image"}
+                        <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover/upload:scale-110 transition-transform">
+                            <Upload className="w-6 h-6 text-gray-400 group-hover/upload:text-white transition-colors" />
+                        </div>
+                        <p className="text-sm font-bold text-gray-400 group-hover/upload:text-white transition-colors">
+                            {file ? file.name : "Click or drag to upload artwork"}
                         </p>
+                        <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tight font-bold">PNG, JPG up to 10MB</p>
                     </div>
+                </div>
+
+                <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-[2rem] group/status">
+                    <div>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Visibility Status</label>
+                        <p className="text-[10px] text-gray-600 font-bold uppercase">{active ? "Curriculum is Public" : "Curriculum is Hidden"}</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setActive(!active)}
+                        className={`w-14 h-8 rounded-full p-1 transition-all duration-300 flex items-center ${active ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'bg-white/10 hover:bg-white/20'}`}
+                    >
+                        <div className={`w-6 h-6 rounded-full transition-all duration-300 transform ${active ? 'bg-black translate-x-6' : 'bg-gray-500 translate-x-0'}`} />
+                    </button>
                 </div>
 
                 <button
                     type="submit"
                     disabled={loading}
-                    className="btn btn-primary w-full"
+                    className="w-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-white text-sm font-black uppercase tracking-widest py-5 rounded-2xl transition-all shadow-xl shadow-white/5 active:scale-[0.98]"
                 >
-                    {loading ? "Creating..." : "Create Course"}
+                    {loading ? "Initializing curriculum..." : "Launch Course"}
                 </button>
             </form>
         </div>

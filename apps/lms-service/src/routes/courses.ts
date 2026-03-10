@@ -22,25 +22,47 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
+    const userId = (req as any).user.id;
+
     try {
-        const course = await prisma.course.findUnique({
-            where: { id: id as string },
+        const course = await prisma.course.findFirst({
+            where: {
+                OR: [
+                    { id: id as string },
+                    { slug: id as string }
+                ]
+            },
             include: {
+                users: {
+                    where: { id: userId },
+                    select: { id: true }
+                },
                 lectures: {
                     orderBy: { order: 'asc' },
                     select: {
                         id: true,
                         title: true,
                         order: true,
-                        videoUrl: true,
-                        encryptionKey: true,
-                        iv: true,
                     }
                 }
             }
         });
+
         if (!course) return res.status(404).json({ error: 'Course not found' });
-        res.json(course);
+
+        const isPurchased = course.users.length > 0;
+
+        // If purchased, fetch full lecture details
+        if (isPurchased) {
+            const fullLectures = await prisma.lecture.findMany({
+                where: { courseId: course.id },
+                orderBy: { order: 'asc' }
+            });
+            return res.json({ ...course, lectures: fullLectures, purchased: true });
+        }
+
+        // If not purchased, return limited details
+        res.json({ ...course, users: undefined, purchased: false });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch course' });
     }
