@@ -7,19 +7,30 @@ import remarkGfm from "remark-gfm";
 import { Course, Lecture } from "@/types";
 
 async function getCourse(slug: string): Promise<Course | null> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${slug}`, {
-        next: { revalidate: 3600 } // SSG: Revalidate every hour
-    });
-    if (!res.ok) return null;
-    return res.json();
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${slug}`, {
+            next: { revalidate: 3600 } // SSG: Revalidate every hour
+        });
+        if (!res.ok) return null;
+        return res.json();
+    } catch (error) {
+        console.warn(`Failed to fetch course ${slug} during build/runtime.`, error);
+        return null;
+    }
 }
 
 export async function generateStaticParams() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`);
-    const courses = await res.json();
-    return courses.map((course: any) => ({
-        slug: course.slug,
-    }));
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`);
+        if (!res.ok) return [];
+        const courses = await res.json();
+        return courses.map((course: any) => ({
+            slug: course.slug,
+        }));
+    } catch (error) {
+        console.warn("Failed to fetch courses for generateStaticParams during build.", error);
+        return [];
+    }
 }
 
 export default async function CourseLandingPage({ params }: { params: Promise<{ slug: string }> }) {
