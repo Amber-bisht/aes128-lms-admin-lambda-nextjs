@@ -42,7 +42,9 @@ model Course {
 model Lecture {
   id        String   @id @default(uuid())
   title     String
-  videoUrl  String?  @map("video_url") // URL to the .m3u8 playlist
+  section   String?  // Grouping heading (e.g., "Introduction")
+  description String? @db.Text // Markdown content
+  videoUrl  String?  @map("video_url")
   
   // Encryption Details for Custom Decryption
   encryptionKey String?  @map("encryption_key") // Hex-encoded AES-128 key

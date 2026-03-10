@@ -1,6 +1,7 @@
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { getSignedVideoUrl } from './cloudfront';
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
@@ -31,7 +32,12 @@ export const uploadToS3 = async (buffer: Buffer, key: string, contentType: strin
 
     await s3.send(command);
 
-    // Construct public URL
-    // Note: If using your public bucket domain format
+    // Construct CloudFront URL if available, otherwise fallback to S3
+    const cloudFrontUrl = process.env.NEXT_PUBLIC_CLOUDFRONT_URL;
+    if (cloudFrontUrl) {
+        // We use the same signing utility for images and videos
+        return getSignedVideoUrl(key);
+    }
+
     return `https://${targetBucket}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
 };

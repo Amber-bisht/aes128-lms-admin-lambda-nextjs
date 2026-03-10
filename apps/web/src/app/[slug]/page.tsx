@@ -1,9 +1,12 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
-import { PlayCircle, Lock, Star, Users, Clock, ChevronRight } from "lucide-react";
+import { PlayCircle, Lock, Star, Users, Clock, ChevronRight, ChevronDown } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Course, Lecture } from "@/types";
 
-async function getCourse(slug: string) {
+async function getCourse(slug: string): Promise<Course | null> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${slug}`, {
         next: { revalidate: 3600 } // SSG: Revalidate every hour
     });
@@ -26,6 +29,16 @@ export default async function CourseLandingPage({ params }: { params: Promise<{ 
     if (!course) {
         return <div className="min-h-screen flex items-center justify-center text-white">Course not found</div>;
     }
+
+    // Grouping logic for sections
+    const groupedLectures: Record<string, Lecture[]> = {};
+    course.lectures?.forEach((lecture) => {
+        const section = lecture.section || "Curriculum";
+        if (!groupedLectures[section]) {
+            groupedLectures[section] = [];
+        }
+        groupedLectures[section].push(lecture);
+    });
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black">
@@ -88,23 +101,45 @@ export default async function CourseLandingPage({ params }: { params: Promise<{ 
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 max-w-3xl">
-                        {course.lectures?.map((lecture: any, index: number) => (
-                            <div
-                                key={lecture.id}
-                                className="group flex items-center gap-8 p-8 bg-white/5 border border-white/5 rounded-3xl hover:border-white/20 transition-all"
-                            >
-                                <span className="text-4xl font-black text-white/10 group-hover:text-white/40 transition-colors w-12">
-                                    {(index + 1).toString().padStart(2, '0')}
-                                </span>
-                                <div className="flex-1">
-                                    <h4 className="text-lg font-black uppercase tracking-tight mb-1">{lecture.title}</h4>
-                                    <div className="flex items-center gap-3">
-                                        <Lock className="w-3 h-3 text-gray-500" />
-                                    </div>
-                                </div>
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <div className="grid grid-cols-1 gap-12 max-w-4xl">
+                        {Object.entries(groupedLectures).map(([section, lectures]) => (
+                            <div key={section} className="space-y-6">
+                                <h3 className="text-xl font-black uppercase tracking-[0.2em] text-blue-500/80 pl-4 border-l-2 border-blue-500/30">
+                                    {section}
+                                </h3>
+                                <div className="grid grid-cols-1 gap-4">
+                                    {lectures.map((lecture, index) => (
+                                        <div
+                                            key={lecture.id}
+                                            className="group flex flex-col gap-4 p-8 bg-white/5 border border-white/5 rounded-3xl hover:border-white/20 transition-all"
+                                        >
+                                            <div className="flex items-center gap-8">
+                                                <span className="text-4xl font-black text-white/5 group-hover:text-white/20 transition-colors w-12">
+                                                    {(index + 1).toString().padStart(2, '0')}
+                                                </span>
+                                                <div className="flex-1">
+                                                    <h4 className="text-lg font-black uppercase tracking-tight mb-1">{lecture.title}</h4>
+                                                    <div className="flex items-center gap-3">
+                                                        <Lock className="w-3 h-3 text-gray-500" />
+                                                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Enrol to watch</span>
+                                                    </div>
+                                                </div>
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                                </div>
+                                            </div>
+
+                                            {lecture.description && (
+                                                <div className="pl-[76px] pr-8 text-sm text-gray-500 leading-relaxed font-medium">
+                                                    <div className="prose prose-invert prose-sm max-w-none">
+                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                            {lecture.description}
+                                                        </ReactMarkdown>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         ))}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,13 +6,16 @@ import { useSession } from "next-auth/react";
 import VideoPlayer from "@/components/VideoPlayer";
 import { PlayCircle, Lock, Loader2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Course, Lecture } from "@/types";
 
 export default function CoursePlayerPage() {
     const { slug } = useParams();
     const router = useRouter();
     const { data: session, status } = useSession();
-    const [course, setCourse] = useState<any>(null);
-    const [activeLecture, setActiveLecture] = useState<any>(null);
+    const [course, setCourse] = useState<Course | null>(null);
+    const [activeLecture, setActiveLecture] = useState<Lecture | null>(null);
     const [purchasing, setPurchasing] = useState(false);
 
     useEffect(() => {
@@ -48,7 +50,7 @@ export default function CoursePlayerPage() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${(session as any).appToken}`
                 },
-                body: JSON.stringify({ courseId: course.id })
+                body: JSON.stringify({ courseId: course?.id })
             });
             const order = await orderRes.json();
 
@@ -57,7 +59,7 @@ export default function CoursePlayerPage() {
                 amount: order.amount,
                 currency: "INR",
                 name: "lms.amberbisht",
-                description: `Enroll in ${course.title}`,
+                description: `Enroll in ${course?.title}`,
                 order_id: order.id,
                 handler: async (response: any) => {
                     const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_API_URL}/payments/verify-payment`, {
@@ -68,7 +70,7 @@ export default function CoursePlayerPage() {
                         },
                         body: JSON.stringify({
                             ...response,
-                            courseId: course.id
+                            courseId: course?.id
                         })
                     });
 
@@ -95,6 +97,16 @@ export default function CoursePlayerPage() {
     );
 
     const isPurchased = course.purchased || (session?.user as any)?.role === 'ADMIN';
+
+    // Grouping logic for sections
+    const groupedLectures: Record<string, Lecture[]> = {};
+    course.lectures?.forEach((lecture) => {
+        const section = lecture.section || "Curriculum";
+        if (!groupedLectures[section]) {
+            groupedLectures[section] = [];
+        }
+        groupedLectures[section].push(lecture);
+    });
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
@@ -130,15 +142,15 @@ export default function CoursePlayerPage() {
 
             <main className="flex-1 flex overflow-hidden">
                 {/* Left: Video Player */}
-                <div className="flex-1 overflow-y-auto bg-black relative">
+                <div className="flex-1 overflow-y-auto bg-black relative custom-scrollbar">
                     <div className="max-w-[1200px] mx-auto p-4 md:p-8">
-                        <div className="aspect-video bg-[#111] rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative mb-10">
+                        <div className="aspect-video bg-[#111] rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative mb-12">
                             {isPurchased ? (
                                 activeLecture ? (
                                     <VideoPlayer
                                         src={activeLecture.videoUrl || ""}
-                                        encryptionKey={activeLecture.encryptionKey || ""}
-                                        iv={activeLecture.iv || ""}
+                                        encryptionKey={(activeLecture as any).encryptionKey || ""}
+                                        iv={(activeLecture as any).iv || ""}
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
@@ -165,47 +177,72 @@ export default function CoursePlayerPage() {
                             )}
                         </div>
 
-                        <div className="max-w-3xl">
-                            <h2 className="text-3xl font-black uppercase tracking-tighter mb-4">
-                                {activeLecture?.title || course.title}
-                            </h2>
-                            <p className="text-gray-400 font-medium leading-relaxed">
-                                {activeLecture?.description || course.description}
-                            </p>
+                        <div className="max-w-4xl space-y-8">
+                            <div>
+                                <h2 className="text-4xl font-black uppercase tracking-tighter mb-4">
+                                    {activeLecture?.title || course.title}
+                                </h2>
+                                <div className="h-1 w-20 bg-blue-500 rounded-full mb-8" />
+                            </div>
+
+                            {activeLecture?.description ? (
+                                <div className="prose prose-invert prose-blue max-w-none bg-white/5 p-8 rounded-3xl border border-white/5 font-medium leading-relaxed">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {activeLecture.description}
+                                    </ReactMarkdown>
+                                </div>
+                            ) : course.description && (
+                                <p className="text-gray-400 font-medium leading-relaxed text-lg">
+                                    {course.description}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Right: Curriculum Index */}
-                <aside className="w-80 border-l border-white/5 bg-[#0d0d0d] hidden lg:flex flex-col">
-                    <div className="p-6 border-b border-white/5">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 mb-1">Curriculum</h3>
-                        <p className="font-black uppercase tracking-tight text-white">Course Syllabus</p>
+                <aside className="w-96 border-l border-white/5 bg-[#0d0d0d] hidden lg:flex flex-col">
+                    <div className="p-8 border-b border-white/5 bg-black/40">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-2">Curriculum</h3>
+                        <p className="text-sm font-black uppercase tracking-tight text-white/90">Course Syllabus</p>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        {course.lectures?.map((lecture: any, index: number) => (
-                            <button
-                                key={lecture.id}
-                                disabled={!isPurchased}
-                                onClick={() => setActiveLecture(lecture)}
-                                className={`w-full p-6 flex items-center gap-4 hover:bg-white/5 transition-all text-left group border-b border-white/[0.02] disabled:opacity-30 ${activeLecture?.id === lecture.id ? 'bg-white/5' : ''}`}
-                            >
-                                <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center text-[10px] font-black transition-all ${activeLecture?.id === lecture.id ? 'bg-white text-black shadow-lg shadow-white/10' : 'bg-white/5 border border-white/10 text-gray-500'}`}>
-                                    {(index + 1).toString().padStart(2, '0')}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-8">
+                        {Object.entries(groupedLectures).map(([section, lectures], sIdx) => (
+                            <div key={section} className="space-y-4">
+                                <h4 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-blue-500/60 flex items-center gap-3">
+                                    <span className="w-1 h-1 bg-blue-500/40 rounded-full" />
+                                    {section}
+                                </h4>
+                                <div className="space-y-1">
+                                    {lectures.map((lecture, lIdx) => (
+                                        <button
+                                            key={lecture.id}
+                                            disabled={!isPurchased}
+                                            onClick={() => setActiveLecture(lecture)}
+                                            className={`w-full p-4 rounded-2xl flex items-center gap-4 hover:bg-white/5 transition-all text-left group disabled:opacity-30 ${activeLecture?.id === lecture.id ? 'bg-white/5 ring-1 ring-white/10' : ''}`}
+                                        >
+                                            <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center text-[10px] font-black transition-all ${activeLecture?.id === lecture.id ? 'bg-white text-black shadow-lg shadow-white/10 scale-110' : 'bg-white/5 border border-white/10 text-gray-500'}`}>
+                                                {(lIdx + 1).toString().padStart(2, '0')}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className={`text-[11px] font-black uppercase tracking-tight truncate ${activeLecture?.id === lecture.id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                                                    {lecture.title}
+                                                </h4>
+                                                {!isPurchased && (
+                                                    <div className="flex items-center gap-1.5 opacity-40">
+                                                        <Lock className="w-2.5 h-2.5 text-gray-500" />
+                                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-600">Locked</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {activeLecture?.id === lecture.id && (
+                                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h4 className={`text-xs font-black uppercase tracking-tight mb-1 truncate ${activeLecture?.id === lecture.id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
-                                        {lecture.title}
-                                    </h4>
-                                    {!isPurchased && (
-                                        <div className="flex items-center gap-1.5 grayscale opacity-40">
-                                            <Lock className="w-2.5 h-2.5" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">Locked</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </button>
+                            </div>
                         ))}
                     </div>
                 </aside>

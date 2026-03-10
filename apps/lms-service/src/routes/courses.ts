@@ -2,6 +2,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticateJWT } from '../middleware/auth';
+import { getSignedVideoUrl } from '../services/cloudfront';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -11,6 +12,15 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
 
+const extractKey = (urlStr: string) => {
+    try {
+        const url = new URL(urlStr);
+        return url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+    } catch (e) {
+        return urlStr;
+    }
+};
+
 // GET all active courses - Public
 router.get('/', async (req: Request, res: Response) => {
     try {
@@ -18,7 +28,13 @@ router.get('/', async (req: Request, res: Response) => {
             where: { active: true },
             orderBy: { createdAt: 'desc' }
         });
-        res.json(courses);
+
+        const signedCourses = courses.map(course => ({
+            ...course,
+            imageUrl: course.imageUrl ? getSignedVideoUrl(extractKey(course.imageUrl)) : course.imageUrl
+        }));
+
+        res.json(signedCourses);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch courses' });
     }
@@ -55,6 +71,8 @@ router.get('/:id', async (req: Request, res: Response) => {
                     select: {
                         id: true,
                         title: true,
+                        section: true,
+                        description: true,
                         order: true,
                     }
                 }
@@ -62,6 +80,11 @@ router.get('/:id', async (req: Request, res: Response) => {
         });
 
         if (!course) return res.status(404).json({ error: 'Course not found' });
+
+        // Sign the main course image
+        if (course.imageUrl) {
+            course.imageUrl = getSignedVideoUrl(extractKey(course.imageUrl));
+        }
 
         // Check if user is enrolled or is admin
         let isPurchased = false;
@@ -81,7 +104,27 @@ router.get('/:id', async (req: Request, res: Response) => {
                 where: { courseId: course.id },
                 orderBy: { order: 'asc' }
             });
-            return res.json({ ...course, lectures: fullLectures, purchased: true });
+
+            // Sign the video URLs using only the object key
+            const signedLectures = fullLectures.map(lecture => {
+                if (!lecture.videoUrl) return lecture;
+
+                // Extract key from URL (everything after the domain)
+                let key = lecture.videoUrl;
+                try {
+                    const url = new URL(lecture.videoUrl);
+                    key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+                } catch (e) {
+                    // Fallback to original if not a valid URL
+                }
+
+                return {
+                    ...lecture,
+                    videoUrl: getSignedVideoUrl(key)
+                };
+            });
+
+            return res.json({ ...course, lectures: signedLectures, purchased: true });
         }
 
         // If not purchased, return limited details
