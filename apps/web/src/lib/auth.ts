@@ -5,8 +5,8 @@ import GoogleProvider from "next-auth/providers/google";
 export const authOptions: NextAuthOptions = {
     providers: [
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID || (() => { throw new Error("GOOGLE_CLIENT_ID is required") })(),
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || (() => { throw new Error("GOOGLE_CLIENT_SECRET is required") })(),
+            clientId: process.env.GOOGLE_CLIENT_ID || "missing-during-build",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "missing-during-build",
         }),
     ],
     session: {
