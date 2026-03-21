@@ -38,8 +38,8 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     // Also replace any real newlines or spaces
     base64Content = base64Content.replace(/\s+/g, '');
     
-    // Reconstruct as PKCS#8 (standard for OpenSSL 3)
-    const cleanedKey = `-----BEGIN PRIVATE KEY-----\n${base64Content}\n-----END PRIVATE KEY-----`;
+    // Reconstruct as PKCS#1 (which matches the original key payload)
+    const cleanedKey = `-----BEGIN RSA PRIVATE KEY-----\n${base64Content}\n-----END RSA PRIVATE KEY-----`;
 
     try {
         const signedUrl = getSignedUrl({
