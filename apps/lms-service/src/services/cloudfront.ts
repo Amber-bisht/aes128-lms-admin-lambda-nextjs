@@ -23,8 +23,13 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     const url = `${CLOUDFRONT_URL.replace(/\/$/, '')}/${s3Key}`;
     const dateLessThan = new Date(Date.now() + expiresIn * 1000).toISOString();
 
-    // Clean the private key: handle escaped newlines and remove any stray quotes
-    const cleanedKey = PRIVATE_KEY.replace(/\\n/g, '\n').replace(/"/g, '').trim();
+    // Clean the private key: handle escaped newlines, remove quotes, and ensure proper line breaks
+    const cleanedKey = PRIVATE_KEY
+        .replace(/"/g, '')        // Remove accidental quotes
+        .split('\\n')             // Split by literal \n
+        .map(line => line.trim()) // Trim each line to remove stray spaces
+        .join('\n')               // Join with real newlines
+        .trim();
 
     try {
         const signedUrl = getSignedUrl({
