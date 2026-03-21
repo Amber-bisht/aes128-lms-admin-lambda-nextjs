@@ -5,11 +5,11 @@ services:
       context: ./apps/gateway
       dockerfile: Dockerfile
     ports:
-      - "4005:4005"
+      - "5004:5004"
     environment:
-      - PORT=4005
-      - LMS_SERVICE_URL=http://lms-service:4000
-      - STUDENT_SERVICE_URL=http://student-service:4001
+      - PORT=5004
+      - LMS_SERVICE_URL=http://lms-service:5002
+      - STUDENT_SERVICE_URL=http://student-service:5003
       - JWT_SECRET=${JWT_SECRET}
     env_file:
       - .env
@@ -25,7 +25,7 @@ services:
       context: ./apps/lms-service
       dockerfile: Dockerfile
     ports:
-      - "4000:4000"
+      - "5002:5002"
     env_file:
       - .env
     networks:
@@ -37,7 +37,7 @@ services:
       context: ./apps/student-service
       dockerfile: Dockerfile
     ports:
-      - "4001:4001"
+      - "5003:5003"
     env_file:
       - .env
     networks:

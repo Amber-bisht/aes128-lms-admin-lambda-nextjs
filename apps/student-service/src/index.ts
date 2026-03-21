@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = process.env.STUDENT_SERVICE_PORT || 4001;
+const PORT = process.env.STUDENT_SERVICE_PORT || 5003;
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key',

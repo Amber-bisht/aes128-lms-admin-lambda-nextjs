@@ -1,14 +1,12 @@
 
 module.exports = {
     apps: [{
-        name: "lms-api",
+        name: "lms-service",
         script: "./dist/index.js",
-        cwd: "./apps/api",
+        cwd: "./apps/lms-service",
         env: {
             NODE_ENV: "production",
-            PORT: 4000
-            // Add other env vars here or use --env-file in newer Node versions
-            // Or load from .env file using dotenv in code (which we do)
+            PORT: 5002
         }
     }]
 }

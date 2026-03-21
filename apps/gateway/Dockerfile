@@ -29,6 +29,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-EXPOSE 4005
+EXPOSE 5004
 
 CMD ["node", "dist/index.js"]

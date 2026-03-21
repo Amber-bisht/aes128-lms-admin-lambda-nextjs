@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.GATEWAY_PORT || 4005;
+const PORT = process.env.GATEWAY_PORT || 5004;
 
 app.use(cors());
 
@@ -38,7 +38,7 @@ const ROUTES = [
         url: '/api/v1/lms', // Content/Admin
         auth: false,
         proxy: {
-            target: process.env.LMS_SERVICE_URL || 'http://localhost:4000',
+            target: process.env.LMS_SERVICE_URL || 'http://localhost:5002',
             changeOrigin: true,
             pathRewrite: {
                 [`^/api/v1/lms`]: '',
@@ -49,7 +49,7 @@ const ROUTES = [
         url: '/api/v1/student', // Payments/Enrollment
         auth: false,
         proxy: {
-            target: process.env.STUDENT_SERVICE_URL || 'http://localhost:4001',
+            target: process.env.STUDENT_SERVICE_URL || 'http://localhost:5003',
             changeOrigin: true,
             pathRewrite: {
                 [`^/api/v1/student`]: '',
