@@ -12,7 +12,11 @@ const PRIVATE_KEY = process.env.CLOUDFRONT_PRIVATE_KEY; // Should be the Multi-l
  */
 export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     if (!CLOUDFRONT_URL || !KEY_PAIR_ID || !PRIVATE_KEY) {
-        console.warn("CloudFront signing credentials missing. Falling back to public URL (if available).");
+        console.warn("CloudFront signing credentials missing:", {
+            hasUrl: !!CLOUDFRONT_URL,
+            hasKeyPair: !!KEY_PAIR_ID,
+            hasPrivateKey: !!PRIVATE_KEY
+        });
         return `${CLOUDFRONT_URL?.replace(/\/$/, '')}/${s3Key}`;
     }
 
