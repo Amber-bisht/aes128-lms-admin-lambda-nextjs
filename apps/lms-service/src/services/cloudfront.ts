@@ -23,17 +23,26 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     const url = `${CLOUDFRONT_URL.replace(/\/$/, '')}/${s3Key}`;
     const dateLessThan = new Date(Date.now() + expiresIn * 1000).toISOString();
 
+    // Clean the private key: handle escaped newlines and remove any stray quotes
+    const cleanedKey = PRIVATE_KEY.replace(/\\n/g, '\n').replace(/"/g, '').trim();
+
     try {
         const signedUrl = getSignedUrl({
             url,
             keyPairId: KEY_PAIR_ID,
-            privateKey: PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle escaped newlines in .env
+            privateKey: cleanedKey,
             dateLessThan,
         });
 
         return signedUrl;
-    } catch (error) {
-        console.error("Error signing CloudFront URL:", error);
+    } catch (error: any) {
+        console.error("Error signing CloudFront URL:", {
+            error: error.message,
+            code: error.code,
+            keyLength: cleanedKey.length,
+            keyStart: cleanedKey.substring(0, 30),
+            keyEnd: cleanedKey.substring(cleanedKey.length - 30)
+        });
         return url; // Return unsigned URL as fallback
     }
 };
