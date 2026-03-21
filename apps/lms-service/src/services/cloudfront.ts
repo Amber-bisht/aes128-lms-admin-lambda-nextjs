@@ -21,43 +21,50 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     }
 
     const url = `${CLOUDFRONT_URL.replace(/\/$/, '')}/${s3Key}`;
-    const dateLessThan = new Date(Date.now() + expiresIn * 1000).toISOString();
-
+    
     // Robust PEM Fixer: Ensures headers are on their own lines and base64 content is clean
     const rawKey = PRIVATE_KEY.replace(/"/g, '').trim();
-    
-    // Remove headers and footers
     let base64Content = rawKey
         .replace(/-----BEGIN (?:RSA )?PRIVATE KEY-----/g, '')
         .replace(/-----END (?:RSA )?PRIVATE KEY-----/g, '');
-
-    // Now base64Content contains exactly what is between the headers.
-    // Replace literal "\n" (two characters) with empty string by using split/join to avoid regex escape hell.
     base64Content = base64Content.split('\\n').join('');
-    
-    // Also replace any real newlines or spaces
     base64Content = base64Content.replace(/\s+/g, '');
-    
-    // Reconstruct as PKCS#1 (which matches the original key payload)
     const cleanedKey = `-----BEGIN RSA PRIVATE KEY-----\n${base64Content}\n-----END RSA PRIVATE KEY-----`;
 
     try {
-        const signedUrl = getSignedUrl({
+        // If it's an HLS Playlist, automatically grant permissions to the ENTIRE VIDEO DIRECTORY
+        if (s3Key.endsWith('.m3u8')) {
+            const wildcardResource = url.replace(/[^/]+$/, '*');
+            const policy = JSON.stringify({
+                Statement: [
+                    {
+                        Resource: wildcardResource,
+                        Condition: {
+                            DateLessThan: {
+                                "AWS:EpochTime": Math.floor(Date.now() / 1000) + expiresIn
+                            }
+                        }
+                    }
+                ]
+            });
+
+            return getSignedUrl({
+                url,
+                keyPairId: KEY_PAIR_ID,
+                privateKey: cleanedKey,
+                policy
+            });
+        }
+
+        // Standard Canned Policy for static files (images, mp4)
+        return getSignedUrl({
             url,
             keyPairId: KEY_PAIR_ID,
             privateKey: cleanedKey,
-            dateLessThan,
+            dateLessThan: new Date(Date.now() + expiresIn * 1000).toISOString(),
         });
-
-        return signedUrl;
     } catch (error: any) {
-        console.error("Error signing CloudFront URL:", {
-            error: error.message,
-            code: error.code,
-            keyLength: cleanedKey.length,
-            keyStart: cleanedKey.substring(0, 30),
-            keyEnd: cleanedKey.substring(cleanedKey.length - 30)
-        });
+        console.error("Error signing CloudFront URL:", error.message);
         return url; // Return unsigned URL as fallback
     }
 };

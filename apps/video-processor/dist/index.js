@@ -35938,29 +35938,78 @@ var processVideo = async (fileKey, videoId) => {
   import_fs.default.writeFileSync(keyInfoPath, `${keyUrl}
 ${keyPath}
 ${iv}`);
-  console.log("Starting FFmpeg...");
+  console.log("Starting FFmpeg ABR...");
+  const dir1080p = import_path.default.join(workDir, "1080p");
+  const dir480p = import_path.default.join(workDir, "480p");
+  if (!import_fs.default.existsSync(dir1080p)) import_fs.default.mkdirSync(dir1080p);
+  if (!import_fs.default.existsSync(dir480p)) import_fs.default.mkdirSync(dir480p);
   await new Promise((resolve, reject) => {
-    (0, import_fluent_ffmpeg.default)(inputPath).outputOptions([
+    (0, import_fluent_ffmpeg.default)(inputPath).output(import_path.default.join(dir1080p, "output.m3u8")).outputOptions([
+      "-vf scale=-2:1080",
+      "-c:v libx264",
+      "-b:v 3000k",
+      "-maxrate 3200k",
+      "-bufsize 6000k",
+      "-c:a aac",
+      "-b:a 128k",
       "-hls_time 10",
       "-hls_list_size 0",
-      `-hls_key_info_file ${keyInfoPath}`
-    ]).output(outputPath).on("end", resolve).on("error", (err) => reject(err)).run();
+      `-hls_key_info_file ${keyInfoPath}`,
+      `-hls_segment_filename ${import_path.default.join(dir1080p, "%03d.ts")}`
+    ]).output(import_path.default.join(dir480p, "output.m3u8")).outputOptions([
+      "-vf scale=-2:480",
+      "-c:v libx264",
+      "-b:v 800k",
+      "-maxrate 850k",
+      "-bufsize 1200k",
+      "-c:a aac",
+      "-b:a 128k",
+      "-hls_time 10",
+      "-hls_list_size 0",
+      `-hls_key_info_file ${keyInfoPath}`,
+      `-hls_segment_filename ${import_path.default.join(dir480p, "%03d.ts")}`
+    ]).on("end", resolve).on("error", (err) => {
+      console.error("FFmpeg error:", err);
+      reject(err);
+    }).run();
   });
-  console.log("Uploading HLS segments...");
-  const hlsFiles = import_fs.default.readdirSync(workDir).filter((f5) => f5.endsWith(".m3u8") || f5.endsWith(".ts"));
-  for (const file of hlsFiles) {
-    const fileContent = import_fs.default.readFileSync(import_path.default.join(workDir, file));
+  const masterPath = import_path.default.join(workDir, "master.m3u8");
+  const masterContent = `#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
+1080p/output.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480
+480p/output.m3u8
+`;
+  import_fs.default.writeFileSync(masterPath, masterContent);
+  console.log("Uploading HLS Master and Variants...");
+  const getAllFiles = (dirPath, arrayOfFiles = []) => {
+    const files = import_fs.default.readdirSync(dirPath);
+    files.forEach((file) => {
+      if (import_fs.default.statSync(import_path.default.join(dirPath, file)).isDirectory()) {
+        arrayOfFiles = getAllFiles(import_path.default.join(dirPath, file), arrayOfFiles);
+      } else {
+        arrayOfFiles.push(import_path.default.join(dirPath, file));
+      }
+    });
+    return arrayOfFiles;
+  };
+  const allFiles = getAllFiles(workDir).filter((f5) => f5.endsWith(".m3u8") || f5.endsWith(".ts"));
+  for (const fileFullPath of allFiles) {
+    const relativeKey = fileFullPath.replace(`${workDir}/`, "");
+    const fileContent = import_fs.default.readFileSync(fileFullPath);
     await s32.send(new import_client_s3.PutObjectCommand({
       Bucket: process.env.S3_BUCKET_PUBLIC,
-      Key: `videos/${videoId}/${file}`,
+      Key: `videos/${videoId}/${relativeKey}`,
       Body: fileContent,
-      ContentType: file.endsWith(".m3u8") ? "application/vnd.apple.mpegurl" : "video/mp2t"
+      // Add type assertions gracefully
+      ContentType: fileFullPath.endsWith(".m3u8") ? "application/vnd.apple.mpegurl" : "video/mp2t"
     }));
   }
   return {
     key: key.toString("hex"),
     iv,
-    playlistUrl: `https://${process.env.S3_BUCKET_PUBLIC}.s3.amazonaws.com/videos/${videoId}/output.m3u8`
+    playlistUrl: `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.S3_BUCKET_PUBLIC}/videos/${videoId}/master.m3u8`
   };
 };
 

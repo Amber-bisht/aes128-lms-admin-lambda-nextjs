@@ -102,25 +102,36 @@ router.get('/:id', async (req: Request, res: Response) => {
         if (isPurchased) {
             const fullLectures = await prisma.lecture.findMany({
                 where: { courseId: course.id },
-                orderBy: { order: 'asc' }
+                orderBy: { order: 'asc' },
+                include: { videoAsset: true }
             });
 
             // Sign the video URLs using only the object key
             const signedLectures = fullLectures.map(lecture => {
-                if (!lecture.videoUrl) return lecture;
+                const rawVideoUrl = lecture.videoAsset?.videoUrl || lecture.videoUrl;
+                if (!rawVideoUrl) return lecture;
 
                 // Extract key from URL (everything after the domain)
-                let key = lecture.videoUrl;
+                let key = rawVideoUrl;
                 try {
-                    const url = new URL(lecture.videoUrl);
+                    const url = new URL(rawVideoUrl);
                     key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+                    // Auto-Correct raw S3 Path-Style URLs
+                    if (key.startsWith('lms.amberbisht/')) key = key.replace('lms.amberbisht/', '');
                 } catch (e) {
                     // Fallback to original if not a valid URL
                 }
 
+                // Append the fully signed CloudFront URL to the videoAsset layer
+                const signedUrl = getSignedVideoUrl(key);
+
                 return {
                     ...lecture,
-                    videoUrl: getSignedVideoUrl(key)
+                    videoUrl: signedUrl,
+                    videoAsset: lecture.videoAsset ? {
+                        ...lecture.videoAsset,
+                        videoUrl: signedUrl
+                    } : null
                 };
             });
 

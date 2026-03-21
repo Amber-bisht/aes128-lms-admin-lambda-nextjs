@@ -148,9 +148,9 @@ export default function CoursePlayerPage() {
                             {isPurchased ? (
                                 activeLecture ? (
                                     <VideoPlayer
-                                        src={activeLecture.videoUrl || ""}
-                                        encryptionKey={(activeLecture as any).encryptionKey || ""}
-                                        iv={(activeLecture as any).iv || ""}
+                                        src={((activeLecture as any).videoAsset?.videoUrl || activeLecture.videoUrl || "").replace('https://lms.amberbisht.s3.amazonaws.com/', 'https://s3.eu-west-1.amazonaws.com/lms.amberbisht/')}
+                                        encryptionKey={(activeLecture as any).videoAsset?.encryptionKey || (activeLecture as any).encryptionKey || ""}
+                                        iv={(activeLecture as any).videoAsset?.iv || (activeLecture as any).iv || ""}
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
