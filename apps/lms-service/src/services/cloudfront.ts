@@ -26,17 +26,17 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     // Robust PEM Fixer: Ensures headers are on their own lines and base64 content is clean
     const rawKey = PRIVATE_KEY.replace(/"/g, '').trim();
     
-    // Extract everything between the BEGIN and END markers
-    const match = rawKey.match(/-----BEGIN RSA PRIVATE KEY-----([\s\S]*)-----END RSA PRIVATE KEY-----/);
+    // Extract everything between the BEGIN and END markers (handles both RSA and generic headers)
+    const match = rawKey.match(/-----BEGIN (?:RSA )?PRIVATE KEY-----([\s\S]*)-----END (?:RSA )?PRIVATE KEY-----/);
     
     let cleanedKey = rawKey;
     if (match && match[1]) {
         // Remove all whitespace and literal \n from the middle content
         const base64Content = match[1].replace(/\\n/g, '').replace(/\s+/g, '');
-        // Reconstruct a valid PEM
-        cleanedKey = `-----BEGIN RSA PRIVATE KEY-----\n${base64Content}\n-----END RSA PRIVATE KEY-----`;
+        // Reconstruct as PKCS#8 (standard for OpenSSL 3)
+        cleanedKey = `-----BEGIN PRIVATE KEY-----\n${base64Content}\n-----END PRIVATE KEY-----`;
     } else {
-        // Fallback: just try to fix common escaping if headers weren't found correctly
+        // Fallback: just try to fix common escaping
         cleanedKey = rawKey.replace(/\\n/g, '\n');
     }
 
