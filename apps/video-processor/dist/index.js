@@ -35930,7 +35930,10 @@ var processVideo = async (fileKey, videoId) => {
   const key = import_crypto.default.randomBytes(16);
   const iv = import_crypto.default.randomBytes(16).toString("hex");
   import_fs.default.writeFileSync(keyPath, key);
-  const apiBase = process.env.API_URL;
+  let apiBase = process.env.API_URL || "";
+  if (apiBase && !apiBase.includes("/api/v1/lms")) {
+    apiBase = `${apiBase.replace(/\/$/, "")}/api/v1/lms`;
+  }
   const keyUrl = `${apiBase}/api/videos/${videoId}/key`;
   import_fs.default.writeFileSync(keyInfoPath, `${keyUrl}
 ${keyPath}
@@ -35973,8 +35976,11 @@ var handler = async (event) => {
     if (!videoId) throw new Error("Could not extract videoId from key");
     const result = await processVideo(key, videoId);
     console.log("Processing complete. Updating DB...", result);
-    const apiBase = process.env.API_URL;
+    let apiBase = process.env.API_URL;
     if (!apiBase) throw new Error("API_URL environment variable is not set");
+    if (!apiBase.includes("/api/v1/lms")) {
+      apiBase = `${apiBase.replace(/\/$/, "")}/api/v1/lms`;
+    }
     const apiResponse = await fetch(`${apiBase}/admin/videos/complete`, {
       method: "POST",
       headers: {

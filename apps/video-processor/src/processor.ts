@@ -32,7 +32,10 @@ export const processVideo = async (fileKey: string, videoId: string): Promise<{ 
     const iv = crypto.randomBytes(16).toString('hex');
     fs.writeFileSync(keyPath, key);
 
-    const apiBase = process.env.API_URL;
+    let apiBase = process.env.API_URL || "";
+    if (apiBase && !apiBase.includes('/api/v1/lms')) {
+        apiBase = `${apiBase.replace(/\/$/, '')}/api/v1/lms`;
+    }
     const keyUrl = `${apiBase}/api/videos/${videoId}/key`;
     fs.writeFileSync(keyInfoPath, `${keyUrl}\n${keyPath}\n${iv}`);
 

@@ -28,8 +28,11 @@ export const handler = async (event: any) => {
         console.log("Processing complete. Updating DB...", result);
 
         // 3. Update Main API with Keys
-        const apiBase = process.env.API_URL;
+        let apiBase = process.env.API_URL;
         if (!apiBase) throw new Error("API_URL environment variable is not set");
+        if (!apiBase.includes('/api/v1/lms')) {
+            apiBase = `${apiBase.replace(/\/$/, '')}/api/v1/lms`;
+        }
 
         const apiResponse = await fetch(`${apiBase}/admin/videos/complete`, {
             method: 'POST',
