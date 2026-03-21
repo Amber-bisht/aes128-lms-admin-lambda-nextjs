@@ -69,6 +69,7 @@ model VideoAsset {
   videoUrl      String   @map("video_url")
   encryptionKey String?  @map("encryption_key")
   iv            String?
+  qualities     String[] @default([]) // e.g. ["1080p", "480p"]
   lecture       Lecture?
   createdAt     DateTime @default(now())
 }

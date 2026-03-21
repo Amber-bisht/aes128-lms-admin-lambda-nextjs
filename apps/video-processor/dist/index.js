@@ -36041,8 +36041,9 @@ var handler = async (event) => {
         videoUrl: result.playlistUrl,
         encryptionKey: result.key,
         // Unique Hex Key
-        iv: result.iv
+        iv: result.iv,
         // Unique Hex VI
+        qualities: ["1080p", "480p"]
       })
     });
     if (!apiResponse.ok) {

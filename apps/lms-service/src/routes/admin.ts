@@ -249,7 +249,7 @@ router.get('/videos', async (req: Request, res: Response) => {
 
 // POST /admin/videos/complete - Lambda Callback
 router.post('/videos/complete', async (req: Request, res: Response) => {
-    const { videoUrl, encryptionKey, iv, name, videoId } = req.body;
+    const { videoUrl, encryptionKey, iv, name, videoId, qualities } = req.body;
 
     try {
         const asset = await prisma.videoAsset.create({
@@ -258,7 +258,8 @@ router.post('/videos/complete', async (req: Request, res: Response) => {
                 name: name || "Processed Video",
                 videoUrl,
                 encryptionKey,
-                iv
+                iv,
+                qualities: qualities || []
             }
         });
         res.json(asset);

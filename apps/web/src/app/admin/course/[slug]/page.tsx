@@ -571,47 +571,42 @@ export default function CourseManagementPage() {
                                 </div>
                             </section>
 
-                            <section className="space-y-10">
+                            <section className="space-y-6">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-1 h-8 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Video Asset (AES-128 Protected)</h3>
+                                    <div className="w-1 h-6 bg-white rounded-full" />
+                                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Video Asset</h3>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                    {/* Active Video */}
-                                    <div className={`p-10 border rounded-none space-y-8 transition-all ${selectedLecture.videoAssetId
-                                            ? 'bg-blue-500/5 border-blue-500/20'
-                                            : 'bg-white/5 border-white/10'
-                                        }`}>
+                                    {/* Active Video Status */}
+                                    <div className="p-8 bg-white/5 border border-white/10 space-y-6 transition-all">
                                         <div className="flex items-center justify-between">
-                                            <div className={`p-4 rounded-none border ${selectedLecture.videoAssetId
-                                                    ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
-                                                    : 'bg-white/5 border-white/10 text-gray-600'
-                                                }`}>
-                                                <Video className="w-6 h-6" />
+                                            <div className="p-3 bg-white/5 text-gray-500">
+                                                <Video className="w-5 h-5" />
                                             </div>
                                             {selectedLecture.videoAssetId && (
-                                                <div className="flex items-center gap-2 bg-green-500/10 px-4 py-2 rounded-full border border-green-500/20">
-                                                    <ShieldCheck className="w-4 h-4 text-green-500" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-green-500">AES-128 Active</span>
+                                                <div className="flex gap-1.5">
+                                                    {(selectedLecture.videoAsset?.qualities || ['1080p', '480p']).map((q: string) => (
+                                                        <span key={q} className="text-[7px] font-black text-white/40 border border-white/10 px-1.5 py-0.5 uppercase tracking-tighter">
+                                                            {q}
+                                                        </span>
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-2">Live Asset</p>
-                                            <h4 className="text-2xl font-black text-white uppercase truncate">
+                                            <h4 className="text-lg font-black text-white uppercase truncate">
                                                 {selectedLecture.videoAsset?.name || "No Video Assigned"}
                                             </h4>
                                             {selectedLecture.videoAssetId && (
-                                                <p className="text-[10px] text-blue-500/50 font-bold uppercase mt-2 tracking-widest">TRANSCODING COMPLETE • HLS SECURE</p>
+                                                <p className="text-[10px] text-gray-600 font-bold uppercase mt-1 tracking-widest">Linked & Ready</p>
                                             )}
                                         </div>
                                         {selectedLecture.videoAssetId && (
                                             <button
                                                 onClick={() => setSelectedLecture({ ...selectedLecture, videoAssetId: null, videoAsset: null })}
-                                                className="w-full py-5 bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/20 rounded-none text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-red-500 transition-all"
+                                                className="w-full py-3 bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/20 rounded-none text-[8px] font-black uppercase tracking-widest text-gray-600 hover:text-red-500 transition-all font-mono"
                                             >
-                                                Detach Asset
+                                                Detach
                                             </button>
                                         )}
                                     </div>
@@ -711,7 +706,16 @@ export default function CourseManagementPage() {
                                                     >
                                                         <div className="flex flex-col truncate flex-1">
                                                             <span className="text-xs font-black text-gray-400 group-hover:text-white uppercase truncate tracking-tight">{video.name || video.id.split('-')[0]}</span>
-                                                            <span className="text-[8px] text-gray-600 font-bold uppercase mt-1 tracking-widest">{new Date(video.createdAt).toDateString()}</span>
+                                                            <div className="flex gap-1.5 mt-1.5">
+                                                                {(video.qualities || ['1080p', '480p']).map((q: string) => (
+                                                                    <span key={q} className="text-[7px] font-black text-gray-600 group-hover:text-white/40 border border-current px-1 uppercase tracking-tighter">
+                                                                        {q}
+                                                                    </span>
+                                                                ))}
+                                                                <span className="text-[7px] font-black text-gray-700 uppercase tracking-tighter ml-auto">
+                                                                    {new Date(video.createdAt).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                         <div className="p-2 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <Plus className="w-3 h-3 text-white" />

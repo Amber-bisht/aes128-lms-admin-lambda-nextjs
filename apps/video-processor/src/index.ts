@@ -44,7 +44,8 @@ export const handler = async (event: any) => {
                 videoId: videoId,
                 videoUrl: result.playlistUrl,
                 encryptionKey: result.key, // Unique Hex Key
-                iv: result.iv             // Unique Hex VI
+                iv: result.iv,             // Unique Hex VI
+                qualities: ['1080p', '480p']
             })
         });
 
