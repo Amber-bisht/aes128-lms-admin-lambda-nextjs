@@ -31,7 +31,7 @@ router.get('/', async (req: Request, res: Response) => {
 
         const signedCourses = courses.map(course => ({
             ...course,
-            imageUrl: course.imageUrl ? getSignedVideoUrl(extractKey(course.imageUrl)) : course.imageUrl
+            imageUrl: course.imageUrl ? getSignedVideoUrl(extractKey(course.imageUrl), 604800) : course.imageUrl
         }));
 
         res.json(signedCourses);
@@ -83,7 +83,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
         // Sign the main course image
         if (course.imageUrl) {
-            course.imageUrl = getSignedVideoUrl(extractKey(course.imageUrl));
+            course.imageUrl = getSignedVideoUrl(extractKey(course.imageUrl), 604800);
         }
 
         // Check if user is enrolled or is admin
