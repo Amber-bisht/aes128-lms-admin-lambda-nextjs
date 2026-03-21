@@ -1,0 +1,48 @@
+services:
+  gateway:
+    image: ghcr.io/amber-bisht/lms-gateway:latest
+    build:
+      context: ./apps/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4005:4005"
+    environment:
+      - PORT=4005
+      - LMS_SERVICE_URL=http://lms-service:4000
+      - STUDENT_SERVICE_URL=http://student-service:4001
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
+    depends_on:
+      - lms-service
+      - student-service
+    networks:
+      - lms-network
+
+  lms-service:
+    image: ghcr.io/amber-bisht/lms-service:latest
+    build:
+      context: ./apps/lms-service
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    networks:
+      - lms-network
+
+  student-service:
+    image: ghcr.io/amber-bisht/lms-student-service:latest
+    build:
+      context: ./apps/student-service
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    env_file:
+      - .env
+    networks:
+      - lms-network
+
+networks:
+  lms-network:
+    driver: bridge

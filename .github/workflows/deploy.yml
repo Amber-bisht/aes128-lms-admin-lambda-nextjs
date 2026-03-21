@@ -1,92 +1,78 @@
-name: Deploy to Amazon ECS
+name: Deploy Backend to VPS via GHCR
 
 on:
   push:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-east-1
-  ECR_REPOSITORY_API: lms-api           # set this to your Amazon ECR repository name
-  ECR_REPOSITORY_WEB: lms-web           # set this to your Amazon ECR repository name
-  ECS_SERVICE_API: lms-api-service      # set this to your Amazon ECS service name
-  ECS_SERVICE_WEB: lms-web-service      # set this to your Amazon ECS service name
-  ECS_CLUSTER: lms-cluster-production   # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION_API: .aws/lms-api-task-definition.json # set this to the path to your Amazon ECS task definition
-  ECS_TASK_DEFINITION_WEB: .aws/lms-web-task-definition.json # set this to the path to your Amazon ECS task definition
-  CONTAINER_NAME_API: lms-api           # set this to the name of the container in the
-  CONTAINER_NAME_WEB: lms-web           # set this to the name of the container in the
+  REGISTRY: ghcr.io
+  IMAGE_NAME_GATEWAY: amber-bisht/lms-gateway
+  IMAGE_NAME_LMS: amber-bisht/lms-service
+  IMAGE_NAME_STUDENT: amber-bisht/lms-student-service
 
 jobs:
-  deploy:
-    name: Deploy
+  build-and-push:
+    name: Build and Push to GHCR
     runs-on: ubuntu-latest
-    environment: production
+    permissions:
+      contents: read
+      packages: write
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push Gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/gateway
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_GATEWAY }}:latest
 
-    - name: Build, tag, and push API image to Amazon ECR
-      id: build-image-api
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_API:latest apps/lms-service
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      - name: Build and push LMS Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/lms-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LMS }}:latest
 
-    - name: Build, tag, and push WEB image to Amazon ECR
-      id: build-image-web
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} -t $ECR_REGISTRY/$ECR_REPOSITORY_WEB:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_WEB:latest apps/web
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_WEB:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_WEB:latest
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_WEB:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      - name: Build and push Student Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/student-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_STUDENT }}:latest
 
-    - name: Fill in the new image ID in the Amazon ECS task definition for API
-      id: task-def-api
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION_API }}
-        container-name: ${{ env.CONTAINER_NAME_API }}
-        image: ${{ steps.build-image-api.outputs.image }}
+  deploy-backend:
+    name: Deploy to VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Deploy Amazon ECS task definition for API
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: ${{ steps.task-def-api.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE_API }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
-
-    - name: Fill in the new image ID in the Amazon ECS task definition for WEB
-      id: task-def-web
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION_WEB }}
-        container-name: ${{ env.CONTAINER_NAME_WEB }}
-        image: ${{ steps.build-image-web.outputs.image }}
-
-    - name: Deploy Amazon ECS task definition for WEB
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: ${{ steps.task-def-web.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE_WEB }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.VPS_PASSWORD }} # Fallback password
+          script: |
+            cd ~/lms-app
+            # Optional: Login to GHCR if images are private
+            # echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            git pull origin main
+            
+            # Pull new images and restart
+            export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
+            docker-compose pull
+            docker-compose up -d
