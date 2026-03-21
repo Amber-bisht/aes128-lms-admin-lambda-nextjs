@@ -26,19 +26,20 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     // Robust PEM Fixer: Ensures headers are on their own lines and base64 content is clean
     const rawKey = PRIVATE_KEY.replace(/"/g, '').trim();
     
-    // Extract everything between the BEGIN and END markers (handles both RSA and generic headers)
-    const match = rawKey.match(/-----BEGIN (?:RSA )?PRIVATE KEY-----([\s\S]*)-----END (?:RSA )?PRIVATE KEY-----/);
+    // Remove headers and footers
+    let base64Content = rawKey
+        .replace(/-----BEGIN (?:RSA )?PRIVATE KEY-----/g, '')
+        .replace(/-----END (?:RSA )?PRIVATE KEY-----/g, '');
+
+    // Now base64Content contains exactly what is between the headers.
+    // Replace literal "\n" (two characters) with empty string by using split/join to avoid regex escape hell.
+    base64Content = base64Content.split('\\n').join('');
     
-    let cleanedKey = rawKey;
-    if (match && match[1]) {
-        // Remove all whitespace and literal \n from the middle content
-        const base64Content = match[1].replace(/\\n/g, '').replace(/\s+/g, '');
-        // Reconstruct as PKCS#8 (standard for OpenSSL 3)
-        cleanedKey = `-----BEGIN PRIVATE KEY-----\n${base64Content}\n-----END PRIVATE KEY-----`;
-    } else {
-        // Fallback: just try to fix common escaping
-        cleanedKey = rawKey.replace(/\\n/g, '\n');
-    }
+    // Also replace any real newlines or spaces
+    base64Content = base64Content.replace(/\s+/g, '');
+    
+    // Reconstruct as PKCS#8 (standard for OpenSSL 3)
+    const cleanedKey = `-----BEGIN PRIVATE KEY-----\n${base64Content}\n-----END PRIVATE KEY-----`;
 
     try {
         const signedUrl = getSignedUrl({
