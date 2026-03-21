@@ -1,7 +1,7 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
-import { PlayCircle, Lock, Star, Users, Clock, ChevronRight, ChevronDown } from "lucide-react";
+import { PlayCircle, Lock, Star, Users, Clock, ChevronRight, ChevronDown, CheckCircle2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Course, Lecture } from "@/types";
@@ -67,130 +67,164 @@ export default async function CourseLandingPage({ params }: { params: Promise<{ 
     });
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black">
-            {/* Hero Section */}
-            <section className="relative pt-32 pb-20 overflow-hidden border-b border-white/5">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
-                    <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/20 blur-[120px] rounded-full" />
-                    <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/20 blur-[120px] rounded-full" />
+        <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black font-sans pb-32">
+            
+            <div className="max-w-[1240px] mx-auto px-6 pt-24">
+                {/* Breadcrumb */}
+                <div className="flex items-center gap-3 text-sm text-gray-400 mb-12 font-medium">
+                    <Link href="/" className="hover:text-white transition-colors flex items-center gap-2">
+                        <span>&larr;</span> Back to Home
+                    </Link>
+                    <span>•</span>
+                    <span>Explore Courses</span>
                 </div>
 
-                <div className="max-w-[1200px] mx-auto px-6 relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                        <div className="space-y-8">
-
-                            <h1 className="text-6xl md:text-7xl font-black tracking-tighter leading-[0.9] uppercase">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start relative">
+                    
+                    {/* LEFT COLUMN: Content */}
+                    <div className="lg:col-span-8 flex flex-col gap-12">
+                        
+                        {/* Title & Description */}
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
                                 {course.title}
                             </h1>
-
-                            <p className="text-xl text-gray-400 font-medium leading-relaxed max-w-xl">
+                            <p className="text-xl text-gray-400 leading-relaxed font-medium">
                                 {course.description}
                             </p>
+                        </div>
 
-
-                            <div className="flex items-center gap-6 pt-4">
-                                <Link
-                                    href={`/${course.slug}/play`}
-                                    className="bg-white text-black px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-gray-200 transition-all transform active:scale-95 shadow-xl shadow-white/5"
-                                >
-                                    Eroll Now — ₹{course.price}
-                                </Link>
-                                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Permanent Access</p>
+                        {/* Instructor Box */}
+                        <div className="border border-white/10 rounded-2xl p-8 bg-[#111] flex flex-col sm:flex-row gap-8 items-start sm:items-center">
+                            <img 
+                                src="https://www.amberbisht.me/hero-profile.webp" 
+                                alt="Amber Bisht"
+                                className="w-24 h-24 flex-shrink-0 rounded-full object-cover border-2 border-white/10 shadow-xl"
+                            />
+                            <div className="flex-1">
+                                <h3 className="text-2xl font-bold text-white mb-3">Meet Your Instructor: Amber Bisht</h3>
+                                <p className="text-gray-400 leading-relaxed font-medium">
+                                    Amber Bisht is a seasoned Software Developer who has contributed extensively to multiple open-source projects. He is passionate about building scalable, real-world applications and empowering the next generation of engineers through hands-on, project-based learning.
+                                </p>
                             </div>
                         </div>
 
-                        <div className="relative group">
-                            <div className="absolute inset-x-0 -bottom-10 h-20 bg-gradient-to-t from-[#0a0a0a] to-transparent z-10" />
-                            <div className="rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl relative">
-                                <img
-                                    src={course.imageUrl || "/placeholder-course.jpg"}
-                                    alt={course.title}
-                                    className="w-full aspect-[4/5] object-cover grayscale-[0.2] transition-all group-hover:grayscale-0 group-hover:scale-105 duration-700"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Curriculum Section */}
-            <section className="py-32 bg-black">
-                <div className="max-w-[1200px] mx-auto px-6">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+                        {/* Syllabus Box */}
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-4">Curriculum</p>
-                            <h2 className="text-5xl font-black uppercase tracking-tighter">What you'll master</h2>
+                            <h2 className="text-2xl font-bold text-white mb-6">Course Syllabus</h2>
+                            <div className="border border-white/10 rounded-2xl bg-[#111] overflow-hidden flex flex-col">
+                                {Object.entries(groupedLectures).map(([section, lectures], sIdx) => (
+                                    <div key={section} className="border-b border-white/10 last:border-b-0">
+                                        <div className="p-6 bg-white/5 border-b border-white/5">
+                                            <h3 className="text-lg font-bold text-blue-400">
+                                                {section}
+                                            </h3>
+                                        </div>
+                                        <div className="divide-y divide-white/5">
+                                            {lectures.map((lecture, lIdx) => (
+                                                <div key={lecture.id} className="p-6 flex flex-col md:flex-row md:items-center gap-6 hover:bg-white/[0.02] transition-colors">
+                                                    <div className="w-10 h-10 flex-shrink-0 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-sm font-bold text-gray-400">
+                                                        {(lIdx + 1).toString().padStart(2, '0')}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-base font-bold text-white mb-2">{lecture.title}</h4>
+                                                        {lecture.description && (
+                                                            <div className="text-sm text-gray-500 line-clamp-2">
+                                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                                    {lecture.description}
+                                                                </ReactMarkdown>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-gray-500 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+                                                        <PlayCircle className="w-4 h-4" />
+                                                        <span className="text-xs font-bold uppercase tracking-widest">Video</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <p className="text-gray-400 font-medium max-w-sm mb-2 text-sm leading-relaxed">
-                            A carefully curated flow designed to take you from absolute zero to architectural mastery.
-                        </p>
+
                     </div>
 
-                    <div className="grid grid-cols-1 gap-12 max-w-4xl">
-                        {Object.entries(groupedLectures).map(([section, lectures]) => (
-                            <div key={section} className="space-y-6">
-                                <h3 className="text-xl font-black uppercase tracking-[0.2em] text-blue-500/80 pl-4 border-l-2 border-blue-500/30">
-                                    {section}
-                                </h3>
-                                <div className="grid grid-cols-1 gap-4">
-                                    {lectures.map((lecture, index) => (
-                                        <div
-                                            key={lecture.id}
-                                            className="group flex flex-col gap-4 p-8 bg-white/5 border border-white/5 rounded-3xl hover:border-white/20 transition-all"
-                                        >
-                                            <div className="flex items-center gap-8">
-                                                <span className="text-4xl font-black text-white/5 group-hover:text-white/20 transition-colors w-12">
-                                                    {(index + 1).toString().padStart(2, '0')}
-                                                </span>
-                                                <div className="flex-1">
-                                                    <h4 className="text-lg font-black uppercase tracking-tight mb-1">{lecture.title}</h4>
-                                                    <div className="flex items-center gap-3">
-                                                        <Lock className="w-3 h-3 text-gray-500" />
-                                                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Enrol to watch</span>
-                                                    </div>
-                                                </div>
-                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
-                                                </div>
-                                            </div>
+                    {/* RIGHT COLUMN: Sticky Card */}
+                    <div className="lg:col-span-4 sticky top-10 flex flex-col gap-6">
+                        
+                        {/* Course Image */}
+                        <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#111] aspect-video relative group">
+                            <img
+                                src={course.imageUrl || "/placeholder-course.jpg"}
+                                alt={course.title}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+                        </div>
 
-                                            {lecture.description && (
-                                                <div className="pl-[76px] pr-8 text-sm text-gray-500 leading-relaxed font-medium">
-                                                    <div className="prose prose-invert prose-sm max-w-none">
-                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                            {lecture.description}
-                                                        </ReactMarkdown>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                        {/* Price & Actions Card */}
+                        <div className="border border-white/10 bg-[#111] rounded-2xl p-6 shadow-2xl flex flex-col gap-6">
+                            <div className="flex items-center justify-between">
+                                <span className="text-4xl font-black text-white">₹{course.price}</span>
+                                <div className="flex items-center gap-1.5 text-yellow-500">
+                                    <Star className="w-4 h-4 fill-yellow-500" />
+                                    <Star className="w-4 h-4 fill-yellow-500" />
+                                    <Star className="w-4 h-4 fill-yellow-500" />
+                                    <Star className="w-4 h-4 fill-yellow-500" />
+                                    <Star className="w-4 h-4 fill-yellow-500" />
+                                    <span className="text-gray-400 text-sm font-medium ml-1">5 (251 reviews)</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
-            {/* Final CTA */}
-            <section className="py-40 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/5 backdrop-blur-3xl z-0" />
-                <div className="relative z-10 max-w-2xl mx-auto px-6">
-                    <h2 className="text-6xl font-black uppercase tracking-tighter mb-8 leading-none">
-                        Ready to level code?
-                    </h2>
-                    <p className="text-gray-400 mb-12 font-medium text-lg">
-                        Master engineering patterns and build products that users actually love.
-                    </p>
-                    <Link
-                        href={`/${course.slug}/play`}
-                        className="inline-block bg-white text-black px-16 py-6 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-white/10"
-                    >
-                        Enroll Now for ₹{course.price}
-                    </Link>
+                            <Link
+                                href={`/${course.slug}/play`}
+                                className="w-full bg-white text-black py-4 rounded-xl font-black text-center transition-transform active:scale-95 hover:bg-gray-200"
+                            >
+                                View Course
+                            </Link>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
+                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                    Full premium curriculum
+                                </div>
+                                <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
+                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                    Lifetime access to updates
+                                </div>
+                                <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
+                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                    Community access
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Course Details Card */}
+                        <div className="border border-white/10 bg-[#111] rounded-2xl p-6 shadow-2xl">
+                            <h3 className="text-lg font-bold text-white mb-6">Course Details</h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center text-sm font-medium">
+                                    <span className="text-gray-500 flex items-center gap-2"><Clock className="w-4 h-4"/> Duration</span>
+                                    <span className="text-white">40+ hours</span>
+                                </div>
+                                <div className="h-px bg-white/5" />
+                                <div className="flex justify-between items-center text-sm font-medium">
+                                    <span className="text-gray-500 flex items-center gap-2"><Users className="w-4 h-4"/> Level</span>
+                                    <span className="text-white">Beginner to Advanced</span>
+                                </div>
+                                <div className="h-px bg-white/5" />
+                                <div className="flex justify-between items-center text-sm font-medium">
+                                    <span className="text-gray-500 flex items-center gap-2"><PlayCircle className="w-4 h-4"/> Language</span>
+                                    <span className="text-white">English</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
-            </section>
+            </div>
         </div>
     );
 }

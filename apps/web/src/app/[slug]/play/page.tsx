@@ -132,7 +132,7 @@ export default function CoursePlayerPage() {
                         <button
                             onClick={handleBuy}
                             disabled={purchasing}
-                            className="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all disabled:opacity-50"
+                            className="bg-white text-black px-4 py-2 rounded-none text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all disabled:opacity-50"
                         >
                             {purchasing ? "Processing..." : `Buy Course — ₹${course.price}`}
                         </button>
@@ -144,7 +144,7 @@ export default function CoursePlayerPage() {
                 {/* Left: Video Player */}
                 <div className="flex-1 overflow-y-auto bg-black relative custom-scrollbar">
                     <div className="max-w-[1200px] mx-auto p-4 md:p-8">
-                        <div className="aspect-video bg-[#111] rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative mb-12">
+                        <div className="aspect-video bg-[#111] rounded-none overflow-hidden border border-white/5 shadow-2xl relative mb-12">
                             {isPurchased ? (
                                 activeLecture ? (
                                     <VideoPlayer
@@ -160,7 +160,7 @@ export default function CoursePlayerPage() {
                                 )
                             ) : (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 bg-black/80 backdrop-blur-3xl">
-                                    <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-8">
+                                    <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-none flex items-center justify-center mb-8">
                                         <Lock className="w-6 h-6 text-white/40" />
                                     </div>
                                     <h3 className="text-3xl font-black mb-4 uppercase tracking-tighter">Content Locked</h3>
@@ -169,7 +169,7 @@ export default function CoursePlayerPage() {
                                     </p>
                                     <button
                                         onClick={handleBuy}
-                                        className="bg-white text-black px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-white/10 hover:scale-105 transition-all"
+                                        className="bg-white text-black px-10 py-5 rounded-none text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-white/10 hover:scale-105 transition-all"
                                     >
                                         Enroll Now — ₹{course.price}
                                     </button>
@@ -186,7 +186,7 @@ export default function CoursePlayerPage() {
                             </div>
 
                             {activeLecture?.description ? (
-                                <div className="prose prose-invert prose-blue max-w-none bg-white/5 p-8 rounded-3xl border border-white/5 font-medium leading-relaxed">
+                                <div className="prose prose-invert prose-blue max-w-none bg-white/5 p-8 rounded-none border border-white/5 font-medium leading-relaxed">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {activeLecture.description}
                                     </ReactMarkdown>
@@ -201,7 +201,7 @@ export default function CoursePlayerPage() {
                 </div>
 
                 {/* Right: Curriculum Index */}
-                <aside className="w-96 border-l border-white/5 bg-[#0d0d0d] hidden lg:flex flex-col">
+                <aside className="w-1/5 border-l border-white/5 bg-[#0d0d0d] hidden lg:flex flex-col">
                     <div className="p-8 border-b border-white/5 bg-black/40">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-2">Curriculum</h3>
                         <p className="text-sm font-black uppercase tracking-tight text-white/90">Course Syllabus</p>
@@ -220,9 +220,9 @@ export default function CoursePlayerPage() {
                                             key={lecture.id}
                                             disabled={!isPurchased}
                                             onClick={() => setActiveLecture(lecture)}
-                                            className={`w-full p-4 rounded-2xl flex items-center gap-4 hover:bg-white/5 transition-all text-left group disabled:opacity-30 ${activeLecture?.id === lecture.id ? 'bg-white/5 ring-1 ring-white/10' : ''}`}
+                                            className={`w-full p-4 rounded-none flex items-center gap-4 hover:bg-white/5 transition-all text-left group disabled:opacity-30 ${activeLecture?.id === lecture.id ? 'bg-white/5 ring-1 ring-white/10' : ''}`}
                                         >
-                                            <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center text-[10px] font-black transition-all ${activeLecture?.id === lecture.id ? 'bg-white text-black shadow-lg shadow-white/10 scale-110' : 'bg-white/5 border border-white/10 text-gray-500'}`}>
+                                            <div className={`w-8 h-8 flex-shrink-0 rounded-none flex items-center justify-center text-[10px] font-black transition-all ${activeLecture?.id === lecture.id ? 'bg-white text-black shadow-lg shadow-white/10 scale-110' : 'bg-white/5 border border-white/10 text-gray-500'}`}>
                                                 {(lIdx + 1).toString().padStart(2, '0')}
                                             </div>
                                             <div className="flex-1 min-w-0">

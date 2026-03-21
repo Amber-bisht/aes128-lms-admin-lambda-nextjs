@@ -30,7 +30,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {courses.filter(c => c.active).map(course => (
-                    <Link href={`/course/${course.slug}`} key={course.id} className="group">
+                    <Link href={`/${course.slug}/play`} key={course.id} className="group">
                         <div className="bg-white/5 border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-white/20 transition-all backdrop-blur-md flex flex-col h-full">
                             <div className="aspect-video relative overflow-hidden bg-white/5">
                                 {course.imageUrl ? (
