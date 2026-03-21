@@ -66,13 +66,17 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           password: ${{ secrets.VPS_PASSWORD }} # Fallback password
           script: |
-            cd ~/lms-app
-            # Optional: Login to GHCR if images are private
-            # echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Ensure the target directory exists and is a git repo
+            if [ ! -d "$HOME/lms-app/.git" ]; then
+              rm -rf "$HOME/lms-app"
+              mkdir -p "$HOME/lms-app"
+              git clone https://github.com/${{ github.repository }}.git "$HOME/lms-app"
+            fi
             
+            cd "$HOME/lms-app"
             git pull origin main
             
             # Pull new images and restart
-            export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
-            docker-compose pull
-            docker-compose up -d
+            export GITHUB_REPOSITORY_OWNER=amber-bisht
+            docker compose pull
+            docker compose up -d
