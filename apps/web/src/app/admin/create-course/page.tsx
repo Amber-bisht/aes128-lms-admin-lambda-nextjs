@@ -89,7 +89,7 @@ export default function CreateCourse() {
         <div className="max-w-2xl mx-auto px-6 py-20">
             <h1 className="text-5xl font-black tracking-tight mb-12 uppercase text-center">Create Course</h1>
 
-            <form onSubmit={handleSubmit} className="p-8 md:p-12 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-8 backdrop-blur-md relative overflow-hidden group">
+            <form onSubmit={handleSubmit} className="p-8 md:p-12 bg-white/5 border border-white/10 rounded-none space-y-8 backdrop-blur-md relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div>
@@ -97,7 +97,7 @@ export default function CreateCourse() {
                     <input
                         name="title"
                         required
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
+                        className="w-full bg-white/5 border border-white/10 rounded-none p-4 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
                         placeholder="e.g. 100x Full Stack Development"
                     />
                 </div>
@@ -109,7 +109,7 @@ export default function CreateCourse() {
                         <input
                             name="slug"
                             required
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-12 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
+                            className="w-full bg-white/5 border border-white/10 rounded-none p-4 pl-12 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
                             placeholder="e.g. full-stack-bootcamp"
                         />
                     </div>
@@ -120,7 +120,7 @@ export default function CreateCourse() {
                     <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Description</label>
                     <textarea
                         name="description"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 h-40 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium resize-none"
+                        className="w-full bg-white/5 border border-white/10 rounded-none p-4 h-40 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium resize-none"
                         placeholder="What will students learn in this premium curriculum?"
                     />
                 </div>
@@ -134,7 +134,7 @@ export default function CreateCourse() {
                             type="number"
                             required
                             min="0"
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pl-10 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
+                            className="w-full bg-white/5 border border-white/10 rounded-none p-4 pl-10 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
                             placeholder="0.00"
                         />
                     </div>
@@ -142,14 +142,14 @@ export default function CreateCourse() {
 
                 <div>
                     <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Cover Image</label>
-                    <div className="border-2 border-dashed border-white/5 rounded-[2rem] p-12 text-center hover:border-white/10 hover:bg-white/[0.02] transition-all cursor-pointer relative group/upload">
+                    <div className="border-2 border-dashed border-white/5 rounded-none p-12 text-center hover:border-white/10 hover:bg-white/[0.02] transition-all cursor-pointer relative group/upload">
                         <input
                             type="file"
                             accept="image/*"
                             className="absolute inset-0 opacity-0 cursor-pointer"
                             onChange={(e) => setFile(e.target.files?.[0] || null)}
                         />
-                        <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover/upload:scale-110 transition-transform">
+                        <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-none flex items-center justify-center mx-auto mb-4 group-hover/upload:scale-110 transition-transform">
                             <Upload className="w-6 h-6 text-gray-400 group-hover/upload:text-white transition-colors" />
                         </div>
                         <p className="text-sm font-bold text-gray-400 group-hover/upload:text-white transition-colors">
@@ -159,7 +159,7 @@ export default function CreateCourse() {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-[2rem] group/status">
+                <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-none group/status">
                     <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Visibility Status</label>
                         <p className="text-[10px] text-gray-600 font-bold uppercase">{active ? "Curriculum is Public" : "Curriculum is Hidden"}</p>
@@ -176,7 +176,7 @@ export default function CreateCourse() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-white text-sm font-black uppercase tracking-widest py-5 rounded-2xl transition-all shadow-xl shadow-white/5 active:scale-[0.98]"
+                    className="w-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-white text-sm font-black uppercase tracking-widest py-5 rounded-none transition-all shadow-xl shadow-white/5 active:scale-[0.98]"
                 >
                     {loading ? "Initializing curriculum..." : "Launch Course"}
                 </button>

@@ -69,9 +69,9 @@ export default function AdminDashboard() {
 
             {/* Stats Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div className="p-8 bg-white/5 border border-white/10 rounded-3xl hover:border-white/20 transition-all group">
+                <div className="p-8 bg-white/5 border border-white/10 rounded-none hover:border-white/20 transition-all group">
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center group-hover:border-white/20 transition-all">
+                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:border-white/20 transition-all">
                             <BookOpen className="w-6 h-6 text-white" />
                         </div>
                         <div>
@@ -81,9 +81,9 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                <div className="p-8 bg-white/5 border border-white/10 rounded-3xl hover:border-white/20 transition-all group">
+                <div className="p-8 bg-white/5 border border-white/10 rounded-none hover:border-white/20 transition-all group">
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center group-hover:border-white/20 transition-all">
+                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:border-white/20 transition-all">
                             <Video className="w-6 h-6 text-white" />
                         </div>
                         <div>
@@ -95,9 +95,9 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                <Link href="/admin/users" className="p-8 bg-white/5 border border-white/10 rounded-3xl hover:border-white/20 transition-all group">
+                <Link href="/admin/users" className="p-8 bg-white/5 border border-white/10 rounded-none hover:border-white/20 transition-all group">
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center group-hover:border-white/20 transition-all">
+                        <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-none flex items-center justify-center group-hover:border-white/20 transition-all">
                             <Users className="w-6 h-6 text-white" />
                         </div>
                         <div>
@@ -110,10 +110,10 @@ export default function AdminDashboard() {
 
             {courses.length === 0 ? (
                 /* Empty State */
-                <div className="p-16 bg-white/5 border border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                <div className="p-16 bg-white/5 border border-white/10 rounded-none flex flex-col items-center justify-center text-center relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center mb-8 group-hover:border-white/20 transition-all">
+                    <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-none flex items-center justify-center mb-8 group-hover:border-white/20 transition-all">
                         <BookOpen className="w-10 h-10 text-gray-500" />
                     </div>
                     <h3 className="text-2xl font-black mb-4">No courses yet</h3>
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
                     </p>
                     <Link
                         href="/admin/create-course"
-                        className="bg-white/5 border border-white/10 hover:bg-white/10 text-white px-8 py-4 rounded-2xl text-sm font-black transition-all backdrop-blur-md"
+                        className="bg-white/5 border border-white/10 hover:bg-white/10 text-white px-8 py-4 rounded-none text-sm font-black transition-all backdrop-blur-md"
                     >
                         Build First Course
                     </Link>
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
                         <Link
                             key={course.id}
                             href={`/admin/course/${course.slug}`}
-                            className="bg-white/5 border border-white/10 rounded-[2rem] overflow-hidden hover:border-white/20 transition-all group flex flex-col"
+                            className="bg-white/5 border border-white/10 rounded-none overflow-hidden hover:border-white/20 transition-all group flex flex-col"
                         >
                             <div className="aspect-video bg-white/5 relative overflow-hidden">
                                 {course.imageUrl ? (

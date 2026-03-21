@@ -24,7 +24,9 @@ import {
     GripVertical,
     Check,
     X,
-    Image as ImageIcon
+    Image as ImageIcon,
+    AlertCircle,
+    CheckCircle2
 } from "lucide-react";
 import CourseEditModal from "@/components/CourseEditModal";
 import ReactMarkdown from 'react-markdown';
@@ -41,6 +43,61 @@ export default function CourseManagementPage() {
     const [selectedLecture, setSelectedLecture] = useState<any>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [availableVideos, setAvailableVideos] = useState<any[]>([]);
+
+    // Upload States
+    const [file, setFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "processing" | "success" | "error">("idle");
+    const [assetName, setAssetName] = useState("");
+
+    const handleUpload = async () => {
+        if (!file || !isAdmin) return;
+        setUploading(true);
+        setUploadStatus("uploading");
+        setProgress(10);
+
+        try {
+            const urlRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload-url`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${appToken}`
+                },
+                body: JSON.stringify({
+                    filename: file.name,
+                    contentType: file.type,
+                    type: "lecture-video"
+                })
+            });
+
+            if (!urlRes.ok) throw new Error("Failed to get upload URL");
+            const { url, key } = await urlRes.json();
+            setProgress(30);
+
+            const uploadRes = await fetch(url, {
+                method: "PUT",
+                headers: { "Content-Type": file.type },
+                body: file
+            });
+
+            if (!uploadRes.ok) throw new Error("S3 Upload Failed");
+            setProgress(70);
+            setUploadStatus("processing");
+
+            setTimeout(() => {
+                setUploadStatus("success");
+                setProgress(100);
+                setUploading(false);
+                fetchVideos(); // Refresh the asset library
+            }, 3000);
+
+        } catch (error) {
+            console.error(error);
+            setUploadStatus("error");
+            setUploading(false);
+        }
+    };
 
     // Inline Creation States
     const [newSectionName, setNewSectionName] = useState("");
@@ -300,7 +357,7 @@ export default function CourseManagementPage() {
                                         >
                                             <button
                                                 onClick={() => setSelectedLecture(lecture)}
-                                                className={`w-full text-left p-4 rounded-2xl flex items-center gap-4 transition-all group border ${selectedLecture?.id === lecture.id
+                                                className={`w-full text-left p-4 rounded-none flex items-center gap-4 transition-all group border ${selectedLecture?.id === lecture.id
                                                         ? 'bg-white/5 border-white/10'
                                                         : 'border-transparent hover:bg-white/[0.02] hover:border-white/5'
                                                     }`}
@@ -339,7 +396,7 @@ export default function CourseManagementPage() {
                                                     if (e.key === 'Enter') handleAddLecture(sectionName, newLectureTitle);
                                                     if (e.key === 'Escape') setAddingLectureToSection(null);
                                                 }}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[10px] font-black uppercase text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all"
+                                                className="w-full bg-white/5 border border-white/10 rounded-none px-4 py-3 text-[10px] font-black uppercase text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all"
                                                 placeholder="Enter Video Name..."
                                             />
                                             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -370,7 +427,7 @@ export default function CourseManagementPage() {
                                         if (e.key === 'Enter') handleAddSection();
                                         if (e.key === 'Escape') setIsAddingSection(false);
                                     }}
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] font-black uppercase text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                                    className="w-full bg-white/5 border border-white/10 rounded-none px-5 py-4 text-[10px] font-black uppercase text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
                                     placeholder="Section Name (e.g. Advanced JS)..."
                                 />
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -385,7 +442,7 @@ export default function CourseManagementPage() {
                         ) : (
                             <button
                                 onClick={() => setIsAddingSection(true)}
-                                className="w-full py-5 border border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-3 text-gray-500 hover:text-white hover:border-white/20 transition-all font-black text-[10px] uppercase tracking-widest bg-white/[0.01]"
+                                className="w-full py-5 border border-dashed border-white/10 rounded-none flex items-center justify-center gap-3 text-gray-500 hover:text-white hover:border-white/20 transition-all font-black text-[10px] uppercase tracking-widest bg-white/[0.01]"
                             >
                                 <Plus className="w-4 h-4" />
                                 Add New Section
@@ -399,7 +456,7 @@ export default function CourseManagementPage() {
             <div className="flex-1 flex flex-col bg-[#0a0a0a] relative">
                 {!selectedLecture ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
-                        <div className="w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center mb-8 border border-white/5">
+                        <div className="w-24 h-24 bg-white/5 rounded-none flex items-center justify-center mb-8 border border-white/5">
                             <Layout className="w-10 h-10 text-gray-800" />
                         </div>
                         <h2 className="text-2xl font-black uppercase tracking-tight text-white mb-4">Select to Edit</h2>
@@ -410,7 +467,7 @@ export default function CourseManagementPage() {
                         {/* Editor Header */}
                         <div className="px-12 py-8 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a]/90 backdrop-blur-3xl z-20">
                             <div className="flex items-center gap-6">
-                                <div className="p-4 bg-white/5 rounded-3xl border border-white/10 shadow-2xl">
+                                <div className="p-4 bg-white/5 rounded-none border border-white/10 shadow-2xl">
                                     <Edit3 className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
@@ -432,7 +489,7 @@ export default function CourseManagementPage() {
                                 <button
                                     onClick={() => handleUpdateLecture()}
                                     disabled={saving}
-                                    className="bg-white text-black px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all active:scale-95 flex items-center gap-3 disabled:opacity-50 shadow-2xl shadow-white/5"
+                                    className="bg-white text-black px-10 py-5 rounded-none text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all active:scale-95 flex items-center gap-3 disabled:opacity-50 shadow-2xl shadow-white/5"
                                 >
                                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                     Save Changes
@@ -449,19 +506,19 @@ export default function CourseManagementPage() {
                                         <div className="w-1 h-6 bg-white rounded-full" />
                                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Lecture Image</h3>
                                     </div>
-                                    <div className="aspect-video bg-white/5 border-2 border-dashed border-white/10 rounded-[2.5rem] relative overflow-hidden group">
+                                    <div className="aspect-video bg-white/5 border-2 border-dashed border-white/10 rounded-none relative overflow-hidden group">
                                         {selectedLecture.imageUrl ? (
                                             <>
-                                                <img src={selectedLecture.imageUrl} alt="Lecture" className="w-full h-full object-cover p-2 rounded-[2.5rem]" />
+                                                <img src={selectedLecture.imageUrl} alt="Lecture" className="w-full h-full object-cover p-2 rounded-none" />
                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <label className="cursor-pointer bg-white text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Change Image</label>
+                                                    <label className="cursor-pointer bg-white text-black px-6 py-3 rounded-none text-[10px] font-black uppercase tracking-widest">Change Image</label>
                                                 </div>
                                             </>
                                         ) : (
                                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
                                                 <ImageIcon className="w-8 h-8 text-gray-800 mb-4" />
                                                 <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">No Preview Image</p>
-                                                <label className="mt-4 cursor-pointer bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Upload Image</label>
+                                                <label className="mt-4 cursor-pointer bg-white/5 border border-white/10 px-6 py-3 rounded-none text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Upload Image</label>
                                             </div>
                                         )}
                                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleUploadImage} />
@@ -482,7 +539,7 @@ export default function CourseManagementPage() {
                                                     type="text"
                                                     value={selectedLecture.title}
                                                     onChange={(e) => setSelectedLecture({ ...selectedLecture, title: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-14 py-5 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-bold tracking-tight"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-none px-14 py-5 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-bold tracking-tight"
                                                 />
                                             </div>
                                         </div>
@@ -494,7 +551,7 @@ export default function CourseManagementPage() {
                                                     type="text"
                                                     value={selectedLecture.section || ''}
                                                     onChange={(e) => setSelectedLecture({ ...selectedLecture, section: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-14 py-5 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-bold tracking-tight"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-none px-14 py-5 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-bold tracking-tight"
                                                 />
                                             </div>
                                         </div>
@@ -506,7 +563,7 @@ export default function CourseManagementPage() {
                                             <textarea
                                                 value={selectedLecture.description || ''}
                                                 onChange={(e) => setSelectedLecture({ ...selectedLecture, description: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-3xl px-14 py-8 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-medium h-48 resize-none leading-relaxed"
+                                                className="w-full bg-white/5 border border-white/10 rounded-none px-14 py-8 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-medium h-48 resize-none leading-relaxed"
                                                 placeholder="Write detailed notes..."
                                             />
                                         </div>
@@ -522,12 +579,12 @@ export default function CourseManagementPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                     {/* Active Video */}
-                                    <div className={`p-10 border rounded-[3rem] space-y-8 transition-all ${selectedLecture.videoAssetId
+                                    <div className={`p-10 border rounded-none space-y-8 transition-all ${selectedLecture.videoAssetId
                                             ? 'bg-blue-500/5 border-blue-500/20'
                                             : 'bg-white/5 border-white/10'
                                         }`}>
                                         <div className="flex items-center justify-between">
-                                            <div className={`p-4 rounded-3xl border ${selectedLecture.videoAssetId
+                                            <div className={`p-4 rounded-none border ${selectedLecture.videoAssetId
                                                     ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
                                                     : 'bg-white/5 border-white/10 text-gray-600'
                                                 }`}>
@@ -552,46 +609,117 @@ export default function CourseManagementPage() {
                                         {selectedLecture.videoAssetId && (
                                             <button
                                                 onClick={() => setSelectedLecture({ ...selectedLecture, videoAssetId: null, videoAsset: null })}
-                                                className="w-full py-5 bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/20 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-red-500 transition-all"
+                                                className="w-full py-5 bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/20 rounded-none text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-red-500 transition-all"
                                             >
                                                 Detach Asset
                                             </button>
                                         )}
                                     </div>
 
-                                    {/* Library Selection */}
-                                    <div className="p-10 bg-white/5 border border-white/10 rounded-[3rem] flex flex-col">
-                                        <div className="flex items-center justify-between mb-8">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Asset Library</p>
-                                            <span className="text-[10px] font-black bg-white/10 px-3 py-1 rounded-full text-white uppercase tracking-tighter">{availableVideos.length} Ready</span>
+                                    {/* Library Selection & Inline Upload */}
+                                    <div className="p-10 bg-white/5 border border-white/10 flex flex-col gap-6">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Asset Management</p>
                                         </div>
-                                        <div className="flex-1 space-y-3 overflow-y-auto max-h-[220px] pr-2 scrollbar-hide">
+
+                                        {/* Inline Upload Zone */}
+                                        <div className={`p-6 border-2 border-dashed flex flex-col items-center justify-center text-center transition-all ${uploadStatus === 'success' ? 'border-green-500/20 bg-green-500/5' : uploadStatus === 'error' ? 'border-red-500/20 bg-red-500/5' : 'border-white/10 hover:border-white/20 bg-white/[0.02]'}`}>
+                                            {uploadStatus === 'idle' && (
+                                                <label className="cursor-pointer space-y-4 w-full">
+                                                    <input
+                                                        type="file"
+                                                        accept="video/*"
+                                                        className="hidden"
+                                                        onChange={(e) => {
+                                                            const f = e.target.files?.[0];
+                                                            if (f) {
+                                                                setFile(f);
+                                                                setAssetName(f.name.split('.')[0]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    {!file ? (
+                                                        <div className="flex flex-col items-center gap-3 py-4">
+                                                            <Upload className="w-6 h-6 text-gray-400" />
+                                                            <div>
+                                                                <p className="text-xs font-black uppercase tracking-widest text-white">Upload New Video</p>
+                                                                <p className="text-[10px] text-gray-500 mt-1">MP4/WebM Supported</p>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10">
+                                                            <div className="text-left flex-1 truncate pr-4">
+                                                                <p className="text-sm font-black text-white truncate">{file.name}</p>
+                                                                <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">{Math.round(file.size / 1024 / 1024)} MB</p>
+                                                            </div>
+                                                            <button
+                                                                onClick={(e) => { e.preventDefault(); handleUpload(); }}
+                                                                className="bg-white text-black px-6 py-3 font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-colors"
+                                                            >
+                                                                Upload & Process
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            )}
+
+                                            {(uploadStatus === 'uploading' || uploadStatus === 'processing') && (
+                                                <div className="w-full py-4 flex flex-col items-center gap-4">
+                                                    <Loader2 className="w-6 h-6 animate-spin text-white/50" />
+                                                    <div>
+                                                        <p className="text-xs font-black uppercase text-white tracking-widest">{uploadStatus === 'uploading' ? 'Streaming to S3...' : 'Transcoding...'}</p>
+                                                        <p className="text-[10px] text-gray-500 mt-1">{progress}% Complete</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            
+                                            {uploadStatus === 'success' && (
+                                                <div className="w-full py-4 flex flex-col items-center gap-4">
+                                                    <CheckCircle2 className="w-8 h-8 text-green-500" />
+                                                    <div>
+                                                        <p className="text-xs font-black uppercase text-green-500 tracking-widest">Asset Processed</p>
+                                                    </div>
+                                                    <button onClick={() => { setUploadStatus('idle'); setFile(null); }} className="text-[10px] uppercase text-gray-500 hover:text-white underline tracking-widest mt-2">Upload Another</button>
+                                                </div>
+                                            )}
+
+                                            {uploadStatus === 'error' && (
+                                                <div className="w-full py-4 flex flex-col items-center gap-4">
+                                                    <AlertCircle className="w-8 h-8 text-red-500" />
+                                                    <div>
+                                                        <p className="text-xs font-black uppercase text-red-500 tracking-widest">Upload Failed</p>
+                                                    </div>
+                                                    <button onClick={() => setUploadStatus('idle')} className="text-[10px] uppercase text-gray-500 hover:text-white underline tracking-widest mt-2">Retry</button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="h-px bg-white/10 w-full" />
+
+                                        {/* Library List */}
+                                        <div className="flex-1 space-y-2 overflow-y-auto max-h-[220px] pr-2 scrollbar-hide">
                                             {availableVideos.length === 0 ? (
-                                                <div className="h-full flex flex-col items-center justify-center text-center py-8">
-                                                    <Loader2 className="w-6 h-6 animate-spin text-white/10 mb-4" />
-                                                    <p className="text-[10px] font-black text-gray-700 uppercase">Awaiting Lambda...</p>
+                                                <div className="h-full flex flex-col items-center justify-center text-center py-4">
+                                                    <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Library Empty</p>
                                                 </div>
                                             ) : (
                                                 availableVideos.map((video) => (
                                                     <button
                                                         key={video.id}
                                                         onClick={() => setSelectedLecture({ ...selectedLecture, videoAssetId: video.id, videoAsset: video })}
-                                                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left flex items-center justify-between group"
+                                                        className="w-full p-4 bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left flex items-center justify-between group"
                                                     >
                                                         <div className="flex flex-col truncate flex-1">
-                                                            <span className="text-[10px] font-black text-gray-500 group-hover:text-white uppercase truncate">{video.name || video.id.split('-')[0]}</span>
-                                                            <span className="text-[8px] text-gray-700 font-bold uppercase mt-1 tracking-widest">{new Date(video.createdAt).toDateString()}</span>
+                                                            <span className="text-xs font-black text-gray-400 group-hover:text-white uppercase truncate tracking-tight">{video.name || video.id.split('-')[0]}</span>
+                                                            <span className="text-[8px] text-gray-600 font-bold uppercase mt-1 tracking-widest">{new Date(video.createdAt).toDateString()}</span>
                                                         </div>
-                                                        <div className="p-2 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <Plus className="w-4 h-4 text-white" />
+                                                        <div className="p-2 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Plus className="w-3 h-3 text-white" />
                                                         </div>
                                                     </button>
                                                 ))
                                             )}
                                         </div>
-                                        <Link href="/admin/upload" className="mt-6 w-full py-4 border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white hover:border-white/20 transition-all group">
-                                            <Upload className="w-4 h-4 transition-transform group-hover:-translate-y-1" /> Open Processor Studio
-                                        </Link>
                                     </div>
                                 </div>
                             </section>

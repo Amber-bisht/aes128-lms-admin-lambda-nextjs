@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-3xl">
+            <div className="bg-white/5 border border-white/10 rounded-none overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-3xl">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -82,7 +82,7 @@ export default function AdminUsersPage() {
                                 <tr key={user.id} className="group hover:bg-white/5 transition-all">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all overflow-hidden text-lg font-black text-white/20">
+                                            <div className="w-12 h-12 rounded-none bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-all overflow-hidden text-lg font-black text-white/20">
                                                 {user.image ? (
                                                     <img src={user.image} alt="" className="w-full h-full object-cover opacity-80" />
                                                 ) : (
