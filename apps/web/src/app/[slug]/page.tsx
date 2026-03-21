@@ -8,27 +8,42 @@ import { Course, Lecture } from "@/types";
 
 async function getCourse(slug: string): Promise<Course | null> {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${slug}`, {
-            next: { revalidate: 3600 } // SSG: Revalidate every hour
+            next: { revalidate: 3600 }, // SSG: Revalidate every hour
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
+
         if (!res.ok) return null;
         return res.json();
     } catch (error) {
-        console.warn(`Failed to fetch course ${slug} during build/runtime.`, error);
+        console.warn(`Failed to fetch course ${slug} during build/runtime. API might be unreachable.`, error);
         return null;
     }
 }
 
 export async function generateStaticParams() {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
         if (!res.ok) return [];
         const courses = await res.json();
         return courses.map((course: any) => ({
             slug: course.slug,
         }));
     } catch (error) {
-        console.warn("Failed to fetch courses for generateStaticParams during build.", error);
+        console.warn("Failed to fetch courses for generateStaticParams during build. API might be unreachable.", error);
         return [];
     }
 }

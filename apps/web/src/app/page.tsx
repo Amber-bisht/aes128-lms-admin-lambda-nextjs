@@ -4,13 +4,20 @@ import { Youtube, Twitter, Instagram, Linkedin, ArrowRight, Star, Globe, Clock, 
 
 async function getCourses() {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
-      next: { revalidate: 3600 } // SSG: Revalidate every hour
+      next: { revalidate: 3600 }, // SSG: Revalidate every hour
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
+    
     if (!res.ok) return [];
     return res.json();
   } catch (error) {
-    console.warn("Failed to fetch courses during build/runtime.", error);
+    console.warn("Failed to fetch courses during build/runtime. API might be unreachable.", error);
     return [];
   }
 }
