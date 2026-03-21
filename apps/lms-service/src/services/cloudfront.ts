@@ -23,13 +23,22 @@ export const getSignedVideoUrl = (s3Key: string, expiresIn: number = 3600) => {
     const url = `${CLOUDFRONT_URL.replace(/\/$/, '')}/${s3Key}`;
     const dateLessThan = new Date(Date.now() + expiresIn * 1000).toISOString();
 
-    // Clean the private key: handle escaped newlines, remove quotes, and ensure proper line breaks
-    const cleanedKey = PRIVATE_KEY
-        .replace(/"/g, '')        // Remove accidental quotes
-        .split('\\n')             // Split by literal \n
-        .map(line => line.trim()) // Trim each line to remove stray spaces
-        .join('\n')               // Join with real newlines
-        .trim();
+    // Robust PEM Fixer: Ensures headers are on their own lines and base64 content is clean
+    const rawKey = PRIVATE_KEY.replace(/"/g, '').trim();
+    
+    // Extract everything between the BEGIN and END markers
+    const match = rawKey.match(/-----BEGIN RSA PRIVATE KEY-----([\s\S]*)-----END RSA PRIVATE KEY-----/);
+    
+    let cleanedKey = rawKey;
+    if (match && match[1]) {
+        // Remove all whitespace and literal \n from the middle content
+        const base64Content = match[1].replace(/\\n/g, '').replace(/\s+/g, '');
+        // Reconstruct a valid PEM
+        cleanedKey = `-----BEGIN RSA PRIVATE KEY-----\n${base64Content}\n-----END RSA PRIVATE KEY-----`;
+    } else {
+        // Fallback: just try to fix common escaping if headers weren't found correctly
+        cleanedKey = rawKey.replace(/\\n/g, '\n');
+    }
 
     try {
         const signedUrl = getSignedUrl({
