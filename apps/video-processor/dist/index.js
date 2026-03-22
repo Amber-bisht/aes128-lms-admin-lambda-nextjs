@@ -35934,7 +35934,7 @@ var processVideo = async (fileKey, videoId) => {
   if (apiBase && !apiBase.includes("/api/v1/lms")) {
     apiBase = `${apiBase.replace(/\/$/, "")}/api/v1/lms`;
   }
-  const keyUrl = `${apiBase}/api/videos/${videoId}/key`;
+  const keyUrl = `${apiBase}/videos/${videoId}/key`;
   import_fs.default.writeFileSync(keyInfoPath, `${keyUrl}
 ${keyPath}
 ${iv}`);

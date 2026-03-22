@@ -16,28 +16,28 @@ export default function Navbar() {
     return (
         <>
             <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
-            <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-black/20 backdrop-blur-xl">
-                <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
+            <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/70 backdrop-blur-xl">
+                <div className="max-w-[1200px] mx-auto px-6 py-5 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <span className="font-bold text-xl tracking-tighter text-white">
-                            lms.<span className="text-gray-400">amberbisht</span>
+                        <span className="font-black text-2xl tracking-tighter text-gray-900 italic">
+                            lms.<span className="text-blue-600">amberbisht</span>
                         </span>
                     </Link>
 
-                    <div className="flex items-center gap-8">
-                        <Link href="#courses" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Courses</Link>
+                    <div className="flex items-center gap-10">
+                        <Link href="#courses" className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors">Courses</Link>
                         {isAuthenticated ? (
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-8">
                                 <Link
                                     href="/dashboard"
-                                    className="text-sm font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                                    className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors flex items-center gap-2"
                                 >
                                     <LayoutDashboard className="w-4 h-4" />
                                     Dashboard
                                 </Link>
                                 <button
                                     onClick={() => signOut()}
-                                    className="text-sm font-medium text-gray-400 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
+                                    className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-2"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     Sign Out
@@ -46,7 +46,7 @@ export default function Navbar() {
                         ) : (
                             <button
                                 onClick={openAuthModal}
-                                className="text-sm font-medium text-gray-400 hover:text-white transition-colors cursor-pointer"
+                                className="bg-gray-900 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-gray-200"
                             >
                                 Sign In
                             </button>

@@ -36,7 +36,7 @@ export const processVideo = async (fileKey: string, videoId: string): Promise<{ 
     if (apiBase && !apiBase.includes('/api/v1/lms')) {
         apiBase = `${apiBase.replace(/\/$/, '')}/api/v1/lms`;
     }
-    const keyUrl = `${apiBase}/api/videos/${videoId}/key`;
+    const keyUrl = `${apiBase}/videos/${videoId}/key`;
     fs.writeFileSync(keyInfoPath, `${keyUrl}\n${keyPath}\n${iv}`);
 
     // 3. Transcode & Encrypt into Multiple Variants (ABR)

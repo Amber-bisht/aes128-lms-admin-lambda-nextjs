@@ -101,127 +101,141 @@ export default function CourseEditModal({ isOpen, onClose, course, onUpdate, app
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                        className="fixed inset-0 bg-white/40 backdrop-blur-md z-[100]"
                     />
 
                     <div className="fixed inset-0 flex items-center justify-center z-[110] p-4 pointer-events-none">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            initial={{ opacity: 0, scale: 0.95, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="w-full max-w-2xl bg-[#161616] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl pointer-events-auto relative"
+                            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                            className="w-full max-w-2xl bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] pointer-events-auto relative italic"
                         >
+                            {/* Background mesh for modal */}
+                            <div className="absolute inset-0 bg-gradient-mesh opacity-20 z-0 pointer-events-none" />
+                            
                             <button
                                 onClick={onClose}
-                                className="absolute top-8 right-8 p-2 rounded-full hover:bg-white/5 text-gray-400 hover:text-white transition-all"
+                                className="absolute top-10 right-10 p-3 rounded-2xl bg-gray-50 border border-transparent hover:border-gray-100 hover:bg-white text-gray-400 hover:text-red-500 transition-all z-20 group"
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                             </button>
 
-                            <div className="p-12">
-                                <h2 className="text-3xl font-black mb-10 uppercase tracking-tight">Edit Curriculum</h2>
+                            <div className="p-16 relative z-10">
+                                <div className="mb-12">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <span className="h-1 w-8 bg-blue-600 rounded-full" />
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Administrative Control</h3>
+                                    </div>
+                                    <h2 className="text-4xl font-black uppercase tracking-tighter text-gray-900 leading-none">Curriculum <span className="text-blue-600">Refinement</span></h2>
+                                </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Course Title</label>
+                                <form onSubmit={handleSubmit} className="space-y-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Nomenclature</label>
                                             <input
                                                 type="text"
                                                 value={formData.title}
                                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-medium"
-                                                placeholder="Enter course title"
+                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black tracking-tight"
+                                                placeholder="e.g. FullStack Matrix"
                                                 required
                                             />
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">URL Slug</label>
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">URL Identifier (Slug)</label>
                                             <input
                                                 type="text"
                                                 value={formData.slug}
                                                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-medium"
-                                                placeholder="course-slug"
+                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black tracking-tight"
+                                                placeholder="fullstack-matrix"
                                                 required
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Description</label>
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Contextual Description</label>
                                         <textarea
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-medium h-32 resize-none"
-                                            placeholder="Course description..."
+                                            className="w-full bg-gray-50/50 border border-gray-100 rounded-[2rem] px-8 py-6 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-medium h-40 resize-none leading-relaxed italic"
+                                            placeholder="Elaborate on the module curriculum..."
                                             required
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Price (INR)</label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Valuation (INR)</label>
                                             <input
                                                 type="number"
                                                 value={formData.price}
                                                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all font-medium"
+                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black"
                                                 placeholder="0.00"
                                                 required
                                             />
                                         </div>
 
-                                        <div className="flex items-end pb-1">
-                                            <label className="flex items-center gap-4 cursor-pointer group bg-white/5 border border-white/10 rounded-2xl px-6 py-4 w-full hover:bg-white/[0.07] transition-all">
+                                        <div className="flex items-end">
+                                            <label className="flex items-center gap-6 cursor-pointer group bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 w-full hover:bg-blue-50 hover:border-blue-100 transition-all">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.active}
                                                     onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                                                    className="w-5 h-5 rounded-lg accent-white cursor-pointer"
+                                                    className="w-6 h-6 rounded-xl accent-blue-600 cursor-pointer"
                                                 />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors">Visible to Public</span>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-600 transition-colors">Visible to Matrix</span>
                                             </label>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Course Thumbnail</label>
-                                        <div className="flex items-center gap-6">
+                                    <div className="space-y-6">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Visual Manifesto (Thumbnail)</label>
+                                        <div className="flex items-center gap-10">
                                             {formData.imageUrl && !imageFile && (
-                                                <img src={formData.imageUrl} alt="Thumbnail" className="w-24 h-24 rounded-2xl object-cover border border-white/10" />
-                                            )}
-                                            {imageFile && (
-                                                <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/20 flex items-center justify-center text-[10px] font-bold uppercase text-gray-400 text-center px-2">
-                                                    New Image Selected
+                                                <div className="relative group">
+                                                    <img src={formData.imageUrl} alt="Thumbnail" className="w-28 h-28 rounded-[2rem] object-cover border-4 border-white shadow-2xl shadow-gray-200" />
+                                                    <div className="absolute inset-0 bg-white/20 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 </div>
                                             )}
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                                                className="block w-full text-sm text-gray-400
-                                                    file:mr-4 file:py-2 file:px-4
-                                                    file:rounded-full file:border-0
-                                                    file:text-xs file:font-black file:uppercase file:tracking-widest
-                                                    file:bg-white/5 file:text-white
-                                                    hover:file:bg-white/10 transition-all cursor-pointer"
-                                            />
+                                            {imageFile && (
+                                                <div className="w-28 h-28 rounded-[2rem] bg-emerald-50 border-2 border-emerald-100 border-dashed flex items-center justify-center text-[8px] font-black uppercase text-emerald-600 text-center px-4 leading-relaxed">
+                                                    New Asset Synchronized
+                                                </div>
+                                            )}
+                                            <div className="flex-1 relative">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                                                    className="w-full hidden"
+                                                    id="course-image-upload"
+                                                />
+                                                <label htmlFor="course-image-upload" className="flex items-center justify-center gap-4 w-full h-20 border-2 border-dashed border-gray-100 rounded-[1.5rem] cursor-pointer hover:bg-gray-50 hover:border-blue-200 transition-all group">
+                                                    <Save className="w-5 h-5 text-gray-300 group-hover:text-blue-600" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-600">Select Image File</span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="pt-6">
+                                    <div className="pt-8">
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full bg-white text-black h-16 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 hover:bg-gray-200 transition-all transform active:scale-95 disabled:opacity-50"
+                                            className="w-full bg-gray-900 text-white h-20 rounded-[2rem] font-black uppercase tracking-[0.3em] text-[10px] flex items-center justify-center gap-4 hover:bg-blue-600 transition-all transform active:scale-[0.98] disabled:opacity-50 shadow-2xl shadow-gray-200"
                                         >
                                             {loading ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <Loader2 className="w-6 h-6 animate-spin" />
                                             ) : (
                                                 <>
                                                     <Save className="w-5 h-5" />
-                                                    Save Changes
+                                                    Commit Changes
                                                 </>
                                             )}
                                         </button>

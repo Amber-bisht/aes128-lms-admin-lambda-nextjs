@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { Settings } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface VideoPlayerProps {
     src: string; // URL to m3u8 (Method=NONE)
@@ -32,16 +33,22 @@ export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps
                         context.url = `${context.url}${context.url.includes('?') ? '&' : '?'}${cfSignatureParams}`;
                     }
 
+                    // Manifest Sanitization: Remove #EXT-X-KEY so HLS.js doesn't fetch keys itself
+                    if (context.url.includes('.m3u8')) {
+                        const originalOnSuccess = callbacks.onSuccess;
+                        callbacks.onSuccess = (response: any, stats: any, context: any) => {
+                            if (response.data && typeof response.data === 'string') {
+                                // Strip key tags to prevent HLS.js from trying to fetch them
+                                response.data = response.data.replace(/#EXT-X-KEY:METHOD=AES-128,URI="[^"]+"(,[A-Z]+=[^,\n]+)*/g, '');
+                            }
+                            originalOnSuccess(response, stats, context);
+                        };
+                    }
+
                     // If it's a segment (ts) and we have keys, decrypt it
                     if (context.responseType === 'arraybuffer' && (context.url.includes('.ts') || context.url.endsWith('.ts'))) {
                         // Offload to Worker
                         const worker = new Worker('/decryption.worker.js');
-
-                        // Pass the fully signed custom-policy key URL if needed
-                        let safeKeyUrl = `${src.replace(/[^/]+$/, 'enc.key')}`;
-                        if (cfSignatureParams && !safeKeyUrl.includes('Policy=')) {
-                            safeKeyUrl = `${safeKeyUrl}?${cfSignatureParams}`;
-                        }
 
                         worker.postMessage({
                             chunkUrl: context.url,
@@ -52,18 +59,18 @@ export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps
 
                         worker.onmessage = (e) => {
                             if (e.data.error) {
-                                callbacks.onError({ code: 500, text: e.data.error });
+                                callbacks.onError({ code: 500, text: e.data.error }, context);
                             } else {
                                 callbacks.onSuccess({
                                     url: context.url,
                                     data: e.data.decryptedBuffer
-                                }, { trequest: performance.now(), tfirst: 0, tload: 0 });
+                                }, { trequest: performance.now(), tfirst: 0, tload: 0 }, context);
                             }
                             worker.terminate();
                         };
 
                         worker.onerror = (err) => {
-                            callbacks.onError({ code: 500, text: "Worker Error" });
+                            callbacks.onError({ code: 500, text: "Worker Error" }, context);
                             worker.terminate();
                         }
 
@@ -126,42 +133,52 @@ export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps
     };
 
     return (
-        <div className="relative w-full aspect-video bg-black rounded-none overflow-hidden glass-card p-0 group">
-            <video ref={videoRef} controls className="w-full h-full" poster="/placeholder-video.jpg" />
+        <div className="relative w-full aspect-video bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100 group">
+            {/* Background mesh for player area */}
+            <div className="absolute inset-0 bg-gradient-mesh opacity-10 z-0 pointer-events-none" />
+            
+            <video ref={videoRef} controls className="w-full h-full relative z-10" poster="/placeholder-video.jpg" />
             
             {/* Custom Quality Settings UI Overlay */}
             {levels.length > 1 && (
-                <div className="absolute top-4 right-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-end">
+                <div className="absolute top-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-95 group-hover:scale-100 flex flex-col items-end">
                     <button 
                         onClick={() => setShowSettings(!showSettings)}
-                        className="bg-black/60 hover:bg-black/80 backdrop-blur-sm px-3 py-2 text-white shadow-xl flex items-center gap-2 border border-white/10"
+                        className="bg-white/90 hover:bg-white backdrop-blur-xl px-4 py-2 text-gray-900 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] flex items-center gap-3 border border-gray-100 rounded-2xl transition-all active:scale-95"
                     >
-                        <Settings className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">
+                        <Settings className={`w-4 h-4 transition-transform duration-500 ${showSettings ? 'rotate-90 text-blue-600' : 'text-gray-400'}`} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
                             {currentLevel === -1 ? 'AUTO' : `${levels.find(l => l.id === currentLevel)?.height}p`}
                         </span>
                     </button>
                     
-                    {showSettings && (
-                        <div className="mt-2 bg-black/90 backdrop-blur-md border border-white/10 shadow-2xl flex flex-col w-36">
-                            <button
-                                onClick={() => handleQualitySelect(-1)}
-                                className={`px-4 py-3 text-left text-xs font-black uppercase tracking-widest transition-all ${currentLevel === -1 ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-white/10'}`}
+                    <AnimatePresence>
+                        {showSettings && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="mt-4 bg-white/95 backdrop-blur-2xl border border-gray-100 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] rounded-[2rem] flex flex-col w-48 overflow-hidden p-2"
                             >
-                                Auto
-                            </button>
-                            {levels.map((level) => (
                                 <button
-                                    key={level.id}
-                                    onClick={() => handleQualitySelect(level.id)}
-                                    className={`px-4 py-3 text-left text-xs font-black uppercase tracking-widest transition-all ${currentLevel === level.id ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-white/10'}`}
+                                    onClick={() => handleQualitySelect(-1)}
+                                    className={`px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest transition-all rounded-xl mb-1 ${currentLevel === -1 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
                                 >
-                                    {level.height}p
-                                    <span className="ml-2 text-[9px] opacity-50 block mt-0.5">{(level.bitrate / 1000000).toFixed(1)} Mbps</span>
+                                    Auto Resolution
                                 </button>
-                            ))}
-                        </div>
-                    )}
+                                {levels.map((level) => (
+                                    <button
+                                        key={level.id}
+                                        onClick={() => handleQualitySelect(level.id)}
+                                        className={`px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-between group/item ${currentLevel === level.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
+                                    >
+                                        <span>{level.height}p</span>
+                                        <span className={`text-[8px] opacity-40 tabular-nums ${currentLevel === level.id ? 'text-white' : 'group-hover/item:text-blue-400'}`}>{(level.bitrate / 1000000).toFixed(1)} Mbps</span>
+                                    </button>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             )}
         </div>

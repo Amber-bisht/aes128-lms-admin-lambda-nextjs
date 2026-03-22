@@ -86,101 +86,123 @@ export default function CreateCourse() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto px-6 py-20">
-            <h1 className="text-5xl font-black tracking-tight mb-12 uppercase text-center">Create Course</h1>
+        <div className="min-h-screen bg-white relative overflow-hidden italic">
+            {/* Background patterns */}
+            <div className="absolute inset-0 bg-gradient-mesh opacity-20 z-0 pointer-events-none" />
+            <div className="absolute inset-0 bg-grid opacity-10 z-0 pointer-events-none" />
 
-            <form onSubmit={handleSubmit} className="p-8 md:p-12 bg-white/5 border border-white/10 rounded-none space-y-8 backdrop-blur-md relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Course Title</label>
-                    <input
-                        name="title"
-                        required
-                        className="w-full bg-white/5 border border-white/10 rounded-none p-4 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
-                        placeholder="e.g. 100x Full Stack Development"
-                    />
+            <div className="max-w-2xl mx-auto px-6 py-24 relative z-10">
+                <div className="text-center mb-16">
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                        <span className="h-1 w-10 bg-blue-600 rounded-full" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600">Curriculum Initiation</h3>
+                        <span className="h-1 w-10 bg-blue-600 rounded-full" />
+                    </div>
+                    <h1 className="text-6xl font-black uppercase tracking-tighter text-gray-900 leading-[0.8]">Forge <br /><span className="text-blue-600">New Module</span></h1>
                 </div>
 
-                <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Course Slug</label>
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold px-1 py-0.5 bg-white/5 rounded text-[8px] tracking-tighter uppercase">URL</span>
+                <form onSubmit={handleSubmit} className="p-12 md:p-16 bg-white/40 backdrop-blur-3xl border border-gray-100 rounded-[3rem] space-y-12 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] group relative">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 via-emerald-400 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Nomenclature</label>
                         <input
-                            name="slug"
+                            name="title"
                             required
-                            className="w-full bg-white/5 border border-white/10 rounded-none p-4 pl-12 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
-                            placeholder="e.g. full-stack-bootcamp"
+                            className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all placeholder:text-gray-300 font-black tracking-tight"
+                            placeholder="e.g. 100x Full Stack Development"
                         />
                     </div>
-                    <p className="text-[9px] text-gray-600 mt-2 uppercase tracking-tight font-bold ml-1">SEO friendly identifier for the course URL</p>
-                </div>
 
-                <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Description</label>
-                    <textarea
-                        name="description"
-                        className="w-full bg-white/5 border border-white/10 rounded-none p-4 h-40 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium resize-none"
-                        placeholder="What will students learn in this premium curriculum?"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Pricing (INR)</label>
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
-                        <input
-                            name="price"
-                            type="number"
-                            required
-                            min="0"
-                            className="w-full bg-white/5 border border-white/10 rounded-none p-4 pl-10 text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium"
-                            placeholder="0.00"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3 ml-1">Cover Image</label>
-                    <div className="border-2 border-dashed border-white/5 rounded-none p-12 text-center hover:border-white/10 hover:bg-white/[0.02] transition-all cursor-pointer relative group/upload">
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
-                        />
-                        <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-none flex items-center justify-center mx-auto mb-4 group-hover/upload:scale-110 transition-transform">
-                            <Upload className="w-6 h-6 text-gray-400 group-hover/upload:text-white transition-colors" />
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">URL Identifier (Slug)</label>
+                        <div className="relative group/input">
+                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-black px-2 py-1 bg-gray-50 border border-gray-100 rounded-lg text-[8px] tracking-tighter uppercase group-focus-within/input:text-blue-600 group-focus-within/input:border-blue-100 transition-all">URL</span>
+                            <input
+                                name="slug"
+                                required
+                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 pl-16 py-6 text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all placeholder:text-gray-300 font-black tracking-tight"
+                                placeholder="full-stack-bootcamp"
+                            />
                         </div>
-                        <p className="text-sm font-bold text-gray-400 group-hover/upload:text-white transition-colors">
-                            {file ? file.name : "Click or drag to upload artwork"}
-                        </p>
-                        <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tight font-bold">PNG, JPG up to 10MB</p>
+                        <p className="text-[9px] text-gray-400 mt-3 uppercase tracking-widest font-black ml-1 opacity-50 italic">Semantic SEO identifier for indexing</p>
                     </div>
-                </div>
 
-                <div className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-none group/status">
-                    <div>
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Visibility Status</label>
-                        <p className="text-[10px] text-gray-600 font-bold uppercase">{active ? "Curriculum is Public" : "Curriculum is Hidden"}</p>
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Contextual Description</label>
+                        <textarea
+                            name="description"
+                            className="w-full bg-gray-50/50 border border-gray-100 rounded-[2rem] px-8 py-6 h-48 text-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all placeholder:text-gray-300 font-medium resize-none leading-relaxed italic"
+                            placeholder="Elaborate on the module curriculum and learning outcomes..."
+                        />
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setActive(!active)}
-                        className={`w-14 h-8 rounded-full p-1 transition-all duration-300 flex items-center ${active ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'bg-white/10 hover:bg-white/20'}`}
-                    >
-                        <div className={`w-6 h-6 rounded-full transition-all duration-300 transform ${active ? 'bg-black translate-x-6' : 'bg-gray-500 translate-x-0'}`} />
-                    </button>
-                </div>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-white text-sm font-black uppercase tracking-widest py-5 rounded-none transition-all shadow-xl shadow-white/5 active:scale-[0.98]"
-                >
-                    {loading ? "Initializing curriculum..." : "Launch Course"}
-                </button>
-            </form>
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Module Valuation (INR)</label>
+                        <div className="relative">
+                            <span className="absolute left-8 top-1/2 -translate-y-1/2 text-gray-400 font-black text-lg">₹</span>
+                            <input
+                                name="price"
+                                type="number"
+                                required
+                                min="0"
+                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 pl-14 py-6 text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all placeholder:text-gray-300 font-black"
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Cover Manifesto (Artwork)</label>
+                        <div className="border-2 border-dashed border-gray-100 rounded-[2.5rem] p-16 text-center hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer relative group/upload shadow-inner">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                            />
+                            <div className="w-20 h-20 bg-white border border-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover/upload:scale-110 group-hover/upload:rotate-6 shadow-lg shadow-gray-100 transition-all duration-500">
+                                <Upload className="w-8 h-8 text-gray-300 group-hover/upload:text-blue-600 transition-colors" />
+                            </div>
+                            <p className="text-sm font-black text-gray-400 group-hover/upload:text-gray-900 transition-colors px-4">
+                                {file ? file.name : "Synchronize visual asset"}
+                            </p>
+                            <p className="text-[10px] text-gray-300 mt-3 uppercase tracking-widest font-black opacity-50">PNG, JPG up to 10MB</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-8 bg-gray-50/50 border border-gray-100 rounded-[2rem] group/status hover:bg-white/80 transition-all">
+                        <div className="space-y-1">
+                            <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Visibility Protocol</label>
+                            <p className={`text-[10px] font-black uppercase tracking-widest transition-colors ${active ? 'text-emerald-600' : 'text-orange-500'}`}>
+                                {active ? "Module is Publicly Available" : "Module is Sequestered"}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setActive(!active)}
+                            className={`w-16 h-10 rounded-full p-1.5 transition-all duration-500 flex items-center ${active ? 'bg-emerald-500 shadow-xl shadow-emerald-100' : 'bg-gray-200'}`}
+                        >
+                            <div className={`w-7 h-7 rounded-full bg-white shadow-sm transition-all duration-500 transform ${active ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+
+                    <div className="pt-6">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-gray-900 text-white h-24 rounded-[2rem] font-black uppercase tracking-[0.4em] text-xs flex items-center justify-center gap-4 hover:bg-blue-600 transition-all transform active:scale-[0.98] disabled:opacity-50 shadow-2xl shadow-gray-200"
+                        >
+                            {loading ? (
+                                <span className="flex items-center gap-4">
+                                    <div className="w-5 h-5 border-4 border-white-40/50 border-t-white rounded-full animate-spin" />
+                                    Synchronizing...
+                                </span>
+                            ) : "Launch Module"}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }
