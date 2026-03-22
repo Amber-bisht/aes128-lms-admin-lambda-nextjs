@@ -78,6 +78,7 @@ export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps
 
             const hls = new Hls({
                 fLoader: CustomLoader as any,
+                pLoader: CustomLoader as any,
                 // debug: true
             });
 
