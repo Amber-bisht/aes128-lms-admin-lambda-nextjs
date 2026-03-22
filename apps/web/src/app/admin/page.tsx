@@ -59,27 +59,27 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-white text-gray-900 relative selection:bg-blue-100 italic font-sans overflow-x-hidden">
-            <div className="fixed inset-0 bg-gradient-mesh opacity-40 z-0 pointer-events-none" />
-            <div className="fixed inset-0 bg-grid opacity-[0.02] z-0 pointer-events-none" />
+        <div className="min-h-screen bg-white text-gray-900 relative selection:bg-blue-100 font-sans overflow-x-hidden">
+            <div className="fixed inset-0 bg-gradient-mesh opacity-80 z-0 pointer-events-none" />
+            <div className="fixed inset-0 bg-grid opacity-100 z-0 pointer-events-none" />
 
             <div className="max-w-[1240px] mx-auto px-6 py-16 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-20">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="h-1 w-8 bg-blue-600 rounded-full" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Administration Console</p>
+                            <span className="h-0.5 w-6 bg-blue-600" />
+                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Admin Console</p>
                         </div>
-                        <h1 className="text-5xl font-black tracking-tighter uppercase text-gray-900 leading-none">
-                            Curriculum <span className="text-blue-600 underline decoration-blue-100 decoration-8 underline-offset-8">Studio</span>
+                        <h1 className="text-5xl font-bold tracking-tighter uppercase text-gray-900 leading-none">
+                            Admin <span className="text-blue-600">Dashboard</span>
                         </h1>
                     </div>
                     <Link
                         href="/admin/create-course"
-                        className="flex items-center gap-4 bg-gray-900 text-white hover:bg-blue-600 px-10 py-5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.3)] hover:-translate-y-1 active:scale-95 group"
+                        className="flex items-center gap-4 bg-gray-900 text-white hover:bg-blue-600 px-8 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-gray-100 active:scale-95 group"
                     >
-                        <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
-                        Create New Course
+                        <PlusCircle className="w-4 h-4" />
+                        Add Course
                     </Link>
                 </div>
 
@@ -88,17 +88,17 @@ export default function AdminDashboard() {
                     {[
                         { label: "Total Courses", value: courses.length, icon: BookOpen, color: "blue" },
                         { label: "Total Lectures", value: courses.reduce((acc, curr) => acc + (curr.lectures?.length || 0), 0), icon: Video, color: "emerald" },
-                        { label: "User Access", value: "Manage", icon: Users, color: "purple", href: "/admin/users" }
+                        { label: "User Management", value: "Manage", icon: Users, color: "purple", href: "/admin/users" }
                     ].map((stat, i) => {
                         const Content = (
-                            <div className="p-10 bg-white border border-gray-100 rounded-[2.5rem] hover:border-blue-100 transition-all group shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)]">
+                            <div className="p-8 bg-white border border-gray-100 rounded-none hover:border-blue-200 transition-all group shadow-sm">
                                 <div className="flex items-center gap-6">
-                                    <div className={`w-16 h-16 bg-${stat.color}-50 border border-${stat.color}-100 rounded-2xl flex items-center justify-center group-hover:bg-${stat.color}-600 transition-all duration-500`}>
-                                        <stat.icon className={`w-7 h-7 text-${stat.color}-600 group-hover:text-white transition-colors duration-500`} />
+                                    <div className={`w-14 h-14 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center group-hover:bg-gray-900 transition-all duration-300`}>
+                                        <stat.icon className={`w-6 h-6 text-gray-400 group-hover:text-white transition-colors`} />
                                     </div>
                                     <div>
-                                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</p>
-                                        <h3 className="text-3xl font-black text-gray-900 group-hover:text-blue-600 transition-colors uppercase tabular-nums">{stat.value}</h3>
+                                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                                        <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors uppercase tabular-nums">{stat.value}</h3>
                                     </div>
                                 </div>
                             </div>
@@ -113,19 +113,19 @@ export default function AdminDashboard() {
                 </div>
 
                 {courses.length === 0 ? (
-                    <div className="p-24 bg-white/50 backdrop-blur-sm border border-gray-100 rounded-[3.5rem] flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-inner">
-                        <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-700">
-                            <BookOpen className="w-12 h-12" />
+                    <div className="p-20 bg-white border border-gray-100 rounded-none flex flex-col items-center justify-center text-center shadow-sm">
+                        <div className="w-20 h-20 bg-gray-50 text-gray-200 rounded-none flex items-center justify-center mb-8">
+                            <BookOpen className="w-10 h-10" />
                         </div>
-                        <h3 className="text-3xl font-black mb-4 text-gray-900 uppercase">Studio is Empty</h3>
-                        <p className="text-gray-500 max-w-sm mb-12 font-medium leading-relaxed italic">
-                            Your curriculum is waiting to be built. Create your first premium course and start delivering value.
+                        <h3 className="text-2xl font-bold mb-4 text-gray-900 uppercase">No Courses Found</h3>
+                        <p className="text-gray-400 max-w-sm mb-10 font-medium leading-relaxed">
+                            Start building your professional curriculum by adding your first course.
                         </p>
                         <Link
                             href="/admin/create-course"
-                            className="bg-blue-600 text-white px-12 py-5 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-blue-700 shadow-xl shadow-blue-500/20"
+                            className="bg-gray-900 text-white px-10 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-blue-600 shadow-xl shadow-gray-100"
                         >
-                            Build First Course
+                            Add Course
                         </Link>
                     </div>
                 ) : (
@@ -134,43 +134,40 @@ export default function AdminDashboard() {
                             <Link
                                 key={course.id}
                                 href={`/admin/course/${course.slug}`}
-                                className="bg-white border border-gray-100 rounded-[3rem] overflow-hidden hover:border-blue-200 transition-all group flex flex-col shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_30px_60px_-15px_rgba(37,99,235,0.1)] hover:-translate-y-3"
+                                className="bg-white border border-gray-100 rounded-none overflow-hidden hover:border-blue-200 transition-all group flex flex-col shadow-sm"
                             >
                                 <div className="aspect-video bg-gray-50 relative overflow-hidden">
                                     {course.imageUrl ? (
-                                        <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover grayscale-[0.2] transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110" />
+                                        <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover grayscale opacity-80 transition-all duration-500 group-hover:grayscale-0 group-hover:opacity-100" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-blue-50">
-                                            <BookOpen className="w-16 h-16 text-blue-200" />
+                                        <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                            <BookOpen className="w-12 h-12 text-gray-200" />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-all duration-700 flex items-center justify-center">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-white border border-white/20 px-6 py-2.5 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">Edit Curriculum</span>
-                                    </div>
-                                    <div className="absolute top-6 left-6 flex gap-2">
-                                        <span className={`text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-md ${course.active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-white/80 text-gray-400 border border-gray-100'}`}>
-                                            {course.active ? 'Public' : 'Hidden'}
+                                    <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/5 transition-all duration-300" />
+                                    <div className="absolute top-4 left-4 flex gap-2">
+                                        <span className={`text-[8px] font-bold px-3 py-1 rounded-none uppercase tracking-widest ${course.active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-white text-gray-400 border border-gray-100'}`}>
+                                            {course.active ? 'Active' : 'Draft'}
                                         </span>
                                     </div>
-                                    <div className="absolute bottom-6 right-6 bg-white/90 border border-gray-100 shadow-sm backdrop-blur-md rounded-xl px-4 py-2">
-                                        <span className="text-sm font-black text-gray-900 italic">₹{course.price}</span>
+                                    <div className="absolute bottom-4 right-4 bg-white border border-gray-100 shadow-sm px-4 py-2">
+                                        <span className="text-sm font-bold text-gray-900">₹{course.price}</span>
                                     </div>
                                 </div>
-                                <div className="p-10 flex-1 flex flex-col bg-white">
+                                <div className="p-8 flex-1 flex flex-col bg-white">
                                     <div className="flex items-center justify-between mb-4">
-                                        <code className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-tighter">{course.slug}</code>
-                                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">{course.lectures?.length || 0} Sessions</span>
+                                        <code className="text-[9px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-sm uppercase tracking-tighter">{course.slug}</code>
+                                        <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">{course.lectures?.length || 0} Modules</span>
                                     </div>
-                                    <h3 className="text-2xl font-black uppercase tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors mb-4 line-clamp-1">{course.title}</h3>
-                                    <p className="text-sm text-gray-400 font-medium line-clamp-2 mb-8 flex-1 italic leading-relaxed">
-                                        {course.description || "No description provided for this architectural journey."}
+                                    <h3 className="text-xl font-bold uppercase tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors mb-4 line-clamp-1">{course.title}</h3>
+                                    <p className="text-xs text-gray-400 font-medium line-clamp-2 mb-8 flex-1 leading-relaxed">
+                                        {course.description || "Course description not provided."}
                                     </p>
-                                    <div className="flex items-center justify-between pt-8 border-t border-gray-50">
+                                    <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Architectural Patterns</span>
+                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Engineering</span>
                                         </div>
-                                        <ChevronRight className="w-5 h-5 text-gray-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight className="w-4 h-4 text-gray-200 group-hover:text-blue-600 transition-all" />
                                     </div>
                                 </div>
                             </Link>

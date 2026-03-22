@@ -109,103 +109,102 @@ export default function CourseEditModal({ isOpen, onClose, course, onUpdate, app
                             initial={{ opacity: 0, scale: 0.95, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                            className="w-full max-w-2xl bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] pointer-events-auto relative italic"
+                            className="w-full max-w-2xl bg-white border border-gray-100 rounded-none overflow-hidden shadow-2xl pointer-events-auto relative"
                         >
                             {/* Background mesh for modal */}
                             <div className="absolute inset-0 bg-gradient-mesh opacity-20 z-0 pointer-events-none" />
                             
                             <button
                                 onClick={onClose}
-                                className="absolute top-10 right-10 p-3 rounded-2xl bg-gray-50 border border-transparent hover:border-gray-100 hover:bg-white text-gray-400 hover:text-red-500 transition-all z-20 group"
+                                className="absolute top-8 right-8 p-3 rounded-none bg-gray-50 border border-transparent hover:border-gray-100 hover:bg-white text-gray-400 hover:text-red-500 transition-all z-20 group"
                             >
                                 <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                             </button>
 
-                            <div className="p-16 relative z-10">
+                            <div className="p-12 md:p-16 relative z-10">
                                 <div className="mb-12">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <span className="h-1 w-8 bg-blue-600 rounded-full" />
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Administrative Control</h3>
+                                        <span className="h-0.5 w-8 bg-blue-600" />
+                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Admin Dashboard</h3>
                                     </div>
-                                    <h2 className="text-4xl font-black uppercase tracking-tighter text-gray-900 leading-none">Curriculum <span className="text-blue-600">Refinement</span></h2>
+                                    <h2 className="text-4xl font-bold uppercase tracking-tighter text-gray-900 leading-none">Edit <span className="text-blue-600">Course</span></h2>
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-10">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Nomenclature</label>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Course Title</label>
                                             <input
                                                 type="text"
                                                 value={formData.title}
                                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black tracking-tight"
-                                                placeholder="e.g. FullStack Matrix"
+                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-none px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
+                                                placeholder="e.g. FULL STACK DEVELOPMENT"
                                                 required
                                             />
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">URL Identifier (Slug)</label>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Url Slug</label>
                                             <input
                                                 type="text"
                                                 value={formData.slug}
                                                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black tracking-tight"
-                                                placeholder="fullstack-matrix"
+                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-none px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
+                                                placeholder="full-stack-bootcamp"
                                                 required
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Contextual Description</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Description</label>
                                         <textarea
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            className="w-full bg-gray-50/50 border border-gray-100 rounded-[2rem] px-8 py-6 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-medium h-40 resize-none leading-relaxed italic"
-                                            placeholder="Elaborate on the module curriculum..."
+                                            className="w-full bg-gray-50/50 border border-gray-100 rounded-none px-8 py-6 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-medium h-40 resize-none leading-relaxed"
+                                            placeholder="Enter course description..."
                                             required
                                         />
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Valuation (INR)</label>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Price (INR)</label>
                                             <input
                                                 type="number"
                                                 value={formData.price}
                                                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black"
+                                                className="w-full bg-gray-50/50 border border-gray-100 rounded-none px-8 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold"
                                                 placeholder="0.00"
                                                 required
                                             />
                                         </div>
 
                                         <div className="flex items-end">
-                                            <label className="flex items-center gap-6 cursor-pointer group bg-gray-50/50 border border-gray-100 rounded-[1.5rem] px-8 py-6 w-full hover:bg-blue-50 hover:border-blue-100 transition-all">
+                                            <label className="flex items-center gap-6 cursor-pointer group bg-gray-50 border border-gray-100 rounded-none px-8 py-6 w-full hover:bg-white hover:border-blue-600 transition-all">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.active}
                                                     onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                                                    className="w-6 h-6 rounded-xl accent-blue-600 cursor-pointer"
+                                                    className="w-6 h-6 rounded-none accent-gray-900 cursor-pointer"
                                                 />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-600 transition-colors">Visible to Matrix</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">Course is Visible</span>
                                             </label>
                                         </div>
                                     </div>
 
                                     <div className="space-y-6">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Visual Manifesto (Thumbnail)</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Course Thumbnail</label>
                                         <div className="flex items-center gap-10">
                                             {formData.imageUrl && !imageFile && (
                                                 <div className="relative group">
-                                                    <img src={formData.imageUrl} alt="Thumbnail" className="w-28 h-28 rounded-[2rem] object-cover border-4 border-white shadow-2xl shadow-gray-200" />
-                                                    <div className="absolute inset-0 bg-white/20 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    <img src={formData.imageUrl} alt="Thumbnail" className="w-28 h-28 rounded-none object-cover border border-gray-100 shadow-sm" />
                                                 </div>
                                             )}
                                             {imageFile && (
-                                                <div className="w-28 h-28 rounded-[2rem] bg-emerald-50 border-2 border-emerald-100 border-dashed flex items-center justify-center text-[8px] font-black uppercase text-emerald-600 text-center px-4 leading-relaxed">
-                                                    New Asset Synchronized
+                                                <div className="w-28 h-28 rounded-none bg-emerald-50 border border-emerald-100 border-dashed flex items-center justify-center text-[8px] font-bold uppercase text-emerald-600 text-center px-4 leading-relaxed">
+                                                    New Image Selected
                                                 </div>
                                             )}
                                             <div className="flex-1 relative">
@@ -214,11 +213,11 @@ export default function CourseEditModal({ isOpen, onClose, course, onUpdate, app
                                                     accept="image/*"
                                                     onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                                                     className="w-full hidden"
-                                                    id="course-image-upload"
+                                                    id="course-image-upload-modal"
                                                 />
-                                                <label htmlFor="course-image-upload" className="flex items-center justify-center gap-4 w-full h-20 border-2 border-dashed border-gray-100 rounded-[1.5rem] cursor-pointer hover:bg-gray-50 hover:border-blue-200 transition-all group">
+                                                <label htmlFor="course-image-upload-modal" className="flex items-center justify-center gap-4 w-full h-20 border border-dashed border-gray-100 rounded-none cursor-pointer hover:bg-gray-50 hover:border-blue-600 transition-all group">
                                                     <Save className="w-5 h-5 text-gray-300 group-hover:text-blue-600" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-600">Select Image File</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-gray-900">Upload Image</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -228,14 +227,14 @@ export default function CourseEditModal({ isOpen, onClose, course, onUpdate, app
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full bg-gray-900 text-white h-20 rounded-[2rem] font-black uppercase tracking-[0.3em] text-[10px] flex items-center justify-center gap-4 hover:bg-blue-600 transition-all transform active:scale-[0.98] disabled:opacity-50 shadow-2xl shadow-gray-200"
+                                            className="w-full bg-gray-900 text-white h-20 rounded-none font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 hover:bg-blue-600 transition-all disabled:opacity-50 shadow-xl shadow-gray-100"
                                         >
                                             {loading ? (
                                                 <Loader2 className="w-6 h-6 animate-spin" />
                                             ) : (
                                                 <>
                                                     <Save className="w-5 h-5" />
-                                                    Commit Changes
+                                                    Save Changes
                                                 </>
                                             )}
                                         </button>

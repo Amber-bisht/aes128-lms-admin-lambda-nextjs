@@ -292,8 +292,8 @@ export default function CourseManagementPage() {
 
     if (status === "loading" || loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-                <Loader2 className="w-8 h-8 animate-spin text-white/20" />
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600/20" />
             </div>
         );
     }
@@ -308,21 +308,21 @@ export default function CourseManagementPage() {
     }
 
     return (
-        <div className="flex h-screen bg-white overflow-hidden italic font-sans selection:bg-blue-100 italic">
+        <div className="flex h-screen bg-white overflow-hidden font-sans selection:bg-blue-100">
             {/* Background Mesh & Grid */}
             <div className="fixed inset-0 bg-gradient-mesh opacity-30 z-0 pointer-events-none" />
             <div className="fixed inset-0 bg-grid opacity-[0.015] z-0 pointer-events-none" />
 
             {/* Sidebar: Curriculum */}
-            <div className="w-[450px] border-r border-gray-100 flex flex-col bg-white/50 backdrop-blur-2xl relative z-10 shadow-2xl shadow-gray-100">
+            <div className="w-[420px] border-r border-gray-100 flex flex-col bg-white relative z-10">
                 <div className="p-10 border-b border-gray-50">
-                    <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors mb-10 group">
+                    <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors mb-10 group">
                         <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                        Infrastructure
+                        Admin Dashboard
                     </Link>
                     <div className="flex items-center justify-between group cursor-pointer" onClick={() => setIsEditModalOpen(true)}>
-                        <h1 className="text-2xl font-black tracking-tighter text-gray-900 uppercase truncate pr-6 leading-none">{course.title}</h1>
-                        <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-blue-50 group-hover:text-blue-600 transition-all border border-gray-100">
+                        <h1 className="text-2xl font-bold tracking-tighter text-gray-900 uppercase truncate pr-6 leading-none">{course.title}</h1>
+                        <div className="p-2 bg-gray-50 rounded-none group-hover:bg-blue-50 group-hover:text-blue-600 transition-all border border-gray-100">
                             <Settings className="w-4 h-4" />
                         </div>
                     </div>
@@ -331,14 +331,13 @@ export default function CourseManagementPage() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-12 scrollbar-hide">
                     {sectionNames.map((sectionName) => (
                         <div key={sectionName} className="space-y-6">
-                            <div className="px-4 flex items-center justify-between">
+                            <div className="px-3 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{sectionName}</h3>
+                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">{sectionName}</h3>
                                 </div>
                                 <button
                                     onClick={() => setAddingLectureToSection(sectionName)}
-                                    className="p-1.5 hover:bg-blue-50 rounded-xl text-gray-300 hover:text-blue-600 transition-all border border-transparent hover:border-blue-100"
+                                    className="p-1.5 hover:bg-gray-50 rounded-none text-gray-300 hover:text-blue-600 transition-all"
                                 >
                                     <Plus className="w-3 h-3" />
                                 </button>
@@ -366,22 +365,19 @@ export default function CourseManagementPage() {
                                         >
                                             <button
                                                 onClick={() => setSelectedLecture(lecture)}
-                                                className={`w-full text-left p-5 rounded-[2rem] flex items-center gap-5 transition-all group border ${selectedLecture?.id === lecture.id
-                                                        ? 'bg-white border-blue-100 shadow-[0_15px_40px_-10px_rgba(37,99,235,0.1)] ring-4 ring-blue-50/50'
-                                                        : 'border-transparent hover:bg-white hover:border-gray-100 hover:shadow-xl hover:shadow-gray-100/50'
+                                                className={`w-full text-left p-4 rounded-none flex items-center gap-5 transition-all group border-l-4 ${selectedLecture?.id === lecture.id
+                                                        ? 'bg-gray-50 border-l-blue-600'
+                                                        : 'border-l-transparent hover:bg-gray-50'
                                                     }`}
                                             >
-                                                <GripVertical className={`w-4 h-4 transition-colors cursor-grab active:cursor-grabbing ${selectedLecture?.id === lecture.id ? 'text-blue-200' : 'text-gray-200 group-hover:text-gray-300'}`} />
-                                                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${selectedLecture?.id === lecture.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-gray-50 text-gray-300 group-hover:bg-white group-hover:border group-hover:border-blue-100 group-hover:text-blue-600 shadow-inner'}`}>
+                                                <GripVertical className={`w-4 h-4 transition-colors cursor-grab active:cursor-grabbing ${selectedLecture?.id === lecture.id ? 'text-blue-600' : 'text-gray-200 group-hover:text-gray-300'}`} />
+                                                <div className={`w-9 h-9 rounded-none flex items-center justify-center transition-all ${selectedLecture?.id === lecture.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-50 text-gray-300 group-hover:text-blue-600'}`}>
                                                     <Video className="w-4 h-4" />
                                                 </div>
                                                 <div className="flex-1 truncate">
-                                                    <p className={`text-[11px] font-black uppercase tracking-tight truncate ${selectedLecture?.id === lecture.id ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'}`}>
+                                                    <p className={`text-[10px] font-bold uppercase tracking-tight truncate ${selectedLecture?.id === lecture.id ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'}`}>
                                                         {lecture.title}
                                                     </p>
-                                                    {selectedLecture?.id === lecture.id && (
-                                                        <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest mt-1 block">Active Asset</span>
-                                                    )}
                                                 </div>
                                             </button>
                                         </Reorder.Item>
@@ -408,14 +404,14 @@ export default function CourseManagementPage() {
                                                     if (e.key === 'Enter') handleAddLecture(sectionName, newLectureTitle);
                                                     if (e.key === 'Escape') setAddingLectureToSection(null);
                                                 }}
-                                                className="w-full bg-white border border-blue-100 rounded-[1.5rem] px-6 py-4 text-[10px] font-black uppercase text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all shadow-xl shadow-blue-100/20"
-                                                placeholder="Asset Title..."
+                                                className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-[10px] font-bold uppercase text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all shadow-sm"
+                                                placeholder="Lecture Title..."
                                             />
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                                                <button onClick={() => handleAddLecture(sectionName, newLectureTitle)} className="p-2 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:scale-105 transition-all">
+                                                <button onClick={() => handleAddLecture(sectionName, newLectureTitle)} className="p-2 bg-gray-900 text-white rounded-none hover:bg-blue-600 transition-all">
                                                     <Check className="w-3 h-3" />
                                                 </button>
-                                                <button onClick={() => setAddingLectureToSection(null)} className="p-2 bg-gray-50 text-gray-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all">
+                                                <button onClick={() => setAddingLectureToSection(null)} className="p-2 bg-gray-50 text-gray-400 rounded-none hover:bg-red-50 hover:text-red-500 transition-all">
                                                     <X className="w-3 h-3" />
                                                 </button>
                                             </div>
@@ -439,25 +435,25 @@ export default function CourseManagementPage() {
                                         if (e.key === 'Enter') handleAddSection();
                                         if (e.key === 'Escape') setIsAddingSection(false);
                                     }}
-                                    className="w-full bg-white border border-gray-200 rounded-[2rem] px-8 py-6 text-[10px] font-black uppercase text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all shadow-2xl shadow-gray-200"
-                                    placeholder="Section Name (e.g. Masterclass)..."
+                                    className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-[10px] font-bold uppercase text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all shadow-sm"
+                                    placeholder="Section Name..."
                                 />
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
-                                    <button onClick={handleAddSection} className="p-2.5 bg-blue-600 text-white rounded-[1rem] shadow-xl shadow-blue-200">
-                                        <Check className="w-4 h-4" />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    <button onClick={handleAddSection} className="p-2 bg-gray-900 text-white rounded-none">
+                                        <Check className="w-3 h-3" />
                                     </button>
-                                    <button onClick={() => setIsAddingSection(false)} className="p-2.5 bg-gray-50 text-gray-400 rounded-[1rem] hover:bg-red-50 hover:text-red-500 transition-all">
-                                        <X className="w-4 h-4" />
+                                    <button onClick={() => setIsAddingSection(false)} className="p-2 bg-gray-50 text-gray-400 rounded-none hover:bg-red-50 hover:text-red-500 transition-all">
+                                        <X className="w-3 h-3" />
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <button
                                 onClick={() => setIsAddingSection(true)}
-                                className="w-full py-6 border-2 border-dashed border-gray-100 rounded-[2rem] flex items-center justify-center gap-4 text-gray-300 hover:text-blue-600 hover:border-blue-200 transition-all font-black text-[10px] uppercase tracking-widest bg-gray-50/30 hover:bg-blue-50/50 group"
+                                className="w-full py-4 border-2 border-dashed border-gray-100 rounded-none flex items-center justify-center gap-4 text-gray-300 hover:text-blue-600 hover:border-blue-200 transition-all font-bold text-[10px] uppercase tracking-widest bg-gray-50/10 group"
                             >
-                                <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                Add Curriculum Section
+                                <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                Add Section
                             </button>
                         )}
                     </div>
@@ -468,43 +464,43 @@ export default function CourseManagementPage() {
             <div className="flex-1 flex flex-col bg-white/30 relative z-10">
                 {!selectedLecture ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-20">
-                        <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center mb-10 border border-gray-100 shadow-2xl shadow-gray-200/50 ring-8 ring-gray-50">
-                            <Layout className="w-12 h-12 text-blue-600" />
+                        <div className="w-24 h-24 bg-gray-50 rounded-none flex items-center justify-center mb-8 border border-gray-100 shadow-sm">
+                            <Layout className="w-8 h-8 text-gray-200" />
                         </div>
-                        <h2 className="text-4xl font-black uppercase tracking-tighter text-gray-900 mb-6 leading-none">Awaiting <span className="text-blue-600">Selection</span></h2>
-                        <p className="text-gray-400 max-w-sm font-black uppercase text-[10px] tracking-[0.3em] leading-relaxed italic">Select an architectural module from the curriculum to begin refined curation.</p>
+                        <h2 className="text-3xl font-bold uppercase tracking-tighter text-gray-900 mb-4 leading-none">Select a <span className="text-blue-600">Lecture</span></h2>
+                        <p className="text-gray-400 max-w-sm font-bold uppercase text-[10px] tracking-widest leading-relaxed">Select a lecture from the curriculum to begin editing.</p>
                     </div>
                 ) : (
                     <>
                         {/* Editor Header */}
-                        <div className="px-16 py-12 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-3xl z-20 shadow-sm shadow-gray-100/50">
+                        <div className="px-16 py-10 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-3xl z-20">
                             <div className="flex items-center gap-8">
-                                <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-blue-200 ring-8 ring-blue-50">
-                                    <Edit3 className="w-8 h-8 text-white" />
+                                <div className="w-16 h-16 bg-gray-900 text-white rounded-none flex items-center justify-center shadow-lg">
+                                    <Edit3 className="w-6 h-6" />
                                 </div>
-                                <div>
-                                    <h2 className="text-3xl font-black uppercase tracking-tighter text-gray-900 leading-none mb-3">{selectedLecture.title}</h2>
+                                <div className="max-w-md">
+                                    <h2 className="text-2xl font-bold uppercase tracking-tighter text-gray-900 leading-none mb-2 truncate">{selectedLecture.title}</h2>
                                     <div className="flex items-center gap-4">
-                                        <span className="text-[10px] text-blue-600 font-black uppercase tracking-[0.3em] px-3 py-1 bg-blue-50 border border-blue-100 rounded-lg">{selectedLecture.section || 'Uncategorized'}</span>
-                                        <div className="w-1.5 h-1.5 bg-gray-200 rounded-full" />
-                                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest italic tracking-[0.2em]">Asset Index: {selectedLecture.id.split('-')[0]}</span>
+                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest px-2 py-0.5 bg-gray-50 border border-gray-100 rounded-none">{selectedLecture.section || 'Uncategorized'}</span>
+                                        <div className="w-1 h-1 bg-gray-200 rounded-full" />
+                                        <span className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">ID: {selectedLecture.id.split('-')[0]}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => handleDeleteLecture(selectedLecture.id)}
-                                    className="w-14 h-14 bg-red-50 border border-red-100 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-all flex items-center justify-center group"
+                                    className="w-12 h-12 bg-white border border-gray-100 text-gray-300 hover:bg-red-50 hover:text-red-500 rounded-none transition-all flex items-center justify-center group"
                                 >
-                                    <Trash2 className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                                    <Trash2 className="w-5 h-5 transition-transform" />
                                 </button>
                                 <button
                                     onClick={() => handleUpdateLecture()}
                                     disabled={saving}
-                                    className="bg-gray-900 text-white px-12 py-6 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all active:scale-95 flex items-center gap-4 disabled:opacity-50 shadow-2xl shadow-gray-200"
+                                    className="bg-gray-900 text-white px-10 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all disabled:opacity-50 shadow-xl shadow-gray-100 flex items-center gap-3"
                                 >
-                                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                                    Commit Changes
+                                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    Save Changes
                                 </button>
                             </div>
                         </div>
@@ -515,24 +511,24 @@ export default function CourseManagementPage() {
                             <section className="grid grid-cols-1 lg:grid-cols-3 gap-16">
                                 <div className="lg:col-span-1 space-y-8">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <span className="h-1 w-8 bg-blue-600 rounded-full" />
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Visual Identity</h3>
+                                        <span className="h-0.5 w-6 bg-blue-600" />
+                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Cover Image</h3>
                                     </div>
-                                    <div className="aspect-video bg-white border-2 border-dashed border-gray-100 rounded-[2.5rem] relative overflow-hidden group shadow-inner ring-8 ring-gray-50">
+                                    <div className="aspect-video bg-gray-50 border-2 border-dashed border-gray-100 rounded-none relative overflow-hidden group">
                                         {selectedLecture.imageUrl ? (
                                             <>
-                                                <img src={selectedLecture.imageUrl} alt="Lecture" className="w-full h-full object-cover p-3 rounded-[2.5rem] grayscale group-hover:grayscale-0 transition-all duration-700" />
-                                                <div className="absolute inset-0 bg-white/90 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center p-12 text-center">
-                                                    <label className="cursor-pointer bg-gray-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-blue-600 transition-all">Refine Visual</label>
+                                                <img src={selectedLecture.imageUrl} alt="Lecture" className="w-full h-full object-cover transition-all duration-500 opacity-80" />
+                                                <div className="absolute inset-0 bg-white/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center p-12 text-center">
+                                                    <label className="cursor-pointer bg-gray-900 text-white px-8 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all">Change Image</label>
                                                 </div>
                                             </>
                                         ) : (
                                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
-                                                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6">
-                                                    <ImageIcon className="w-8 h-8 text-gray-200" />
+                                                <div className="w-12 h-12 bg-white border border-gray-100 rounded-none flex items-center justify-center mb-6">
+                                                    <ImageIcon className="w-6 h-6 text-gray-200" />
                                                 </div>
-                                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-8 leading-relaxed italic">The canvas is currently devoid of imagery</p>
-                                                <label className="cursor-pointer bg-white border border-gray-100 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm">Upload Matrix</label>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-8">No image selected</p>
+                                                <label className="cursor-pointer bg-white border border-gray-100 px-8 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">Upload Image</label>
                                             </div>
                                         )}
                                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleUploadImage} />
@@ -541,102 +537,92 @@ export default function CourseManagementPage() {
 
                                 <div className="lg:col-span-2 space-y-10">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <span className="h-1 w-8 bg-blue-600 rounded-full" />
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Core Metadata</h3>
+                                        <span className="h-0.5 w-6 bg-blue-600" />
+                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Lecture Details</h3>
                                     </div>
                                     <div className="grid grid-cols-2 gap-10">
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Nomenclature</label>
-                                            <div className="relative group">
-                                                <Type className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                                                <input
-                                                    type="text"
-                                                    value={selectedLecture.title}
-                                                    onChange={(e) => setSelectedLecture({ ...selectedLecture, title: e.target.value })}
-                                                    className="w-full bg-white border border-gray-100 rounded-[1.5rem] px-16 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black tracking-tight"
-                                                />
-                                            </div>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Lecture Title</label>
+                                            <input
+                                                type="text"
+                                                value={selectedLecture.title}
+                                                onChange={(e) => setSelectedLecture({ ...selectedLecture, title: e.target.value })}
+                                                className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
+                                            />
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Contextual Section</label>
-                                            <div className="relative group">
-                                                <Layout className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                                                <input
-                                                    type="text"
-                                                    value={selectedLecture.section || ''}
-                                                    onChange={(e) => setSelectedLecture({ ...selectedLecture, section: e.target.value })}
-                                                    className="w-full bg-white border border-gray-100 rounded-[1.5rem] px-16 py-6 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-black tracking-tight"
-                                                />
-                                            </div>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Section Name</label>
+                                            <input
+                                                type="text"
+                                                value={selectedLecture.section || ''}
+                                                onChange={(e) => setSelectedLecture({ ...selectedLecture, section: e.target.value })}
+                                                className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
+                                            />
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Content Manifesto (Markdown)</label>
-                                        <div className="relative group">
-                                            <FileText className="absolute left-6 top-8 w-4 h-4 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
-                                            <textarea
-                                                value={selectedLecture.description || ''}
-                                                onChange={(e) => setSelectedLecture({ ...selectedLecture, description: e.target.value })}
-                                                className="w-full bg-white border border-gray-100 rounded-[2.5rem] px-16 py-10 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-50/50 transition-all font-medium h-64 resize-none leading-relaxed italic"
-                                                placeholder="Imprint your detailed knowledge here..."
-                                            />
-                                        </div>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Lecture Description (Markdown)</label>
+                                        <textarea
+                                            value={selectedLecture.description || ''}
+                                            onChange={(e) => setSelectedLecture({ ...selectedLecture, description: e.target.value })}
+                                            className="w-full bg-white border border-gray-100 rounded-none px-8 py-8 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-medium h-64 resize-none leading-relaxed"
+                                            placeholder="Enter lecture description..."
+                                        />
                                     </div>
                                 </div>
                             </section>
 
                             <section className="space-y-10">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <span className="h-1 w-8 bg-blue-600 rounded-full" />
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Video Integration</h3>
+                                    <span className="h-0.5 w-6 bg-blue-600" />
+                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Video Asset</h3>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                                     {/* Active Video Status */}
-                                    <div className="p-12 bg-white border border-gray-100 rounded-[3rem] space-y-10 transition-all shadow-xl shadow-gray-100 relative group overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100%] opacity-20 -mr-10 -mt-10" />
-                                        <div className="flex items-center justify-between relative z-10">
-                                            <div className="w-16 h-16 bg-blue-600 text-white rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-blue-200 ring-8 ring-blue-50">
-                                                <Video className="w-6 h-6" />
+                                    <div className="p-10 bg-white border border-gray-100 rounded-none space-y-8 transition-all shadow-sm relative overflow-hidden">
+                                        <div className="flex items-center justify-between">
+                                            <div className="w-12 h-12 bg-gray-50 text-gray-400 rounded-none flex items-center justify-center border border-gray-100">
+                                                <Video className="w-5 h-5" />
                                             </div>
                                             {selectedLecture.videoAssetId && (
                                                 <div className="flex gap-2">
                                                     {(selectedLecture.videoAsset?.qualities || ['1080p', '480p']).map((q: string) => (
-                                                        <span key={q} className="text-[8px] font-black text-blue-600 border border-blue-100 px-3 py-1 bg-blue-50 rounded-lg uppercase tracking-widest leading-none">
+                                                        <span key={q} className="text-[8px] font-bold text-gray-400 border border-gray-100 px-2 py-0.5 bg-gray-50 rounded-none uppercase tracking-widest leading-none">
                                                             {q}
                                                         </span>
                                                     ))}
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="relative z-10">
-                                            <h4 className="text-2xl font-black text-gray-900 uppercase truncate leading-none mb-3">
-                                                {selectedLecture.videoAsset?.name || "Unlinked Nexus"}
+                                        <div>
+                                            <h4 className="text-xl font-bold text-gray-900 uppercase truncate leading-none mb-2">
+                                                {selectedLecture.videoAsset?.name || "No Video"}
                                             </h4>
                                             {selectedLecture.videoAssetId && (
                                                 <div className="flex items-center gap-2">
-                                                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                                                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] italic">Active Synchronized Asset</p>
+                                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Active Asset</p>
                                                 </div>
                                             )}
                                         </div>
                                         {selectedLecture.videoAssetId && (
                                             <button
                                                 onClick={() => setSelectedLecture({ ...selectedLecture, videoAssetId: null, videoAsset: null })}
-                                                className="w-full py-5 bg-red-50 border border-red-100 font-black text-[10px] uppercase tracking-[0.2em] text-red-400 hover:bg-red-500 hover:text-white rounded-[1.5rem] transition-all relative z-10"
+                                                className="w-full py-4 bg-white border border-gray-100 font-bold text-[10px] uppercase tracking-widest text-gray-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 rounded-none transition-all"
                                             >
-                                                Sever Connection
+                                                Detach Video
                                             </button>
                                         )}
                                     </div>
 
                                     {/* Library Selection & Inline Upload */}
-                                    <div className="p-12 bg-white border border-gray-100 rounded-[3rem] flex flex-col gap-10 shadow-xl shadow-gray-100">
+                                    <div className="p-10 bg-white border border-gray-100 rounded-none flex flex-col gap-8 shadow-sm">
                                         <div className="flex items-center justify-between">
-                                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Resource Ingestion</p>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Video Management</p>
                                         </div>
 
                                         {/* Inline Upload Zone */}
-                                        <div className={`p-10 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center text-center transition-all min-h-[200px] ${uploadStatus === 'success' ? 'border-emerald-200 bg-emerald-50/50' : uploadStatus === 'error' ? 'border-red-200 bg-red-50/50' : 'border-gray-100 hover:border-blue-200 bg-gray-50/30'}`}>
+                                        <div className={`p-8 border-2 border-dashed rounded-none flex flex-col items-center justify-center text-center transition-all min-h-[200px] ${uploadStatus === 'success' ? 'border-emerald-100 bg-emerald-50/20' : uploadStatus === 'error' ? 'border-red-100 bg-red-50/20' : 'border-gray-100 bg-gray-50/30'}`}>
                                             {uploadStatus === 'idle' && (
                                                 <label className="cursor-pointer space-y-6 w-full group">
                                                     <input
@@ -652,31 +638,29 @@ export default function CourseManagementPage() {
                                                         }}
                                                     />
                                                     {!file ? (
-                                                        <div className="flex flex-col items-center gap-6">
-                                                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                                                <Upload className="w-6 h-6 text-blue-600" />
+                                                        <div className="flex flex-col items-center gap-4">
+                                                            <div className="w-12 h-12 bg-white border border-gray-100 rounded-none flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-all shadow-sm">
+                                                                <Upload className="w-5 h-5" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-900 mb-2">Initialize Upload</p>
-                                                                <p className="text-[10px] text-gray-400 font-medium italic">High-Fidelity Cinema Only</p>
+                                                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-900 mb-1">Upload Video</p>
+                                                                <p className="text-[9px] text-gray-400 font-medium">MP4/MOV files supported</p>
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="w-full space-y-8">
-                                                            <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 flex items-center gap-6">
-                                                                <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center">
-                                                                    <Video className="w-6 h-6 text-gray-300" />
-                                                                </div>
-                                                                <div className="text-left flex-1 min-w-0">
-                                                                    <p className="text-sm font-black text-gray-900 truncate leading-none mb-1">{file.name}</p>
-                                                                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest tabular-nums italic">{Math.round(file.size / 1024 / 1024)} MB Net Weight</p>
+                                                        <div className="w-full space-y-6">
+                                                            <div className="bg-white p-4 border border-gray-100 rounded-none flex items-center gap-4 text-left">
+                                                                <Video className="w-5 h-5 text-gray-300" />
+                                                                <div className="min-w-0">
+                                                                    <p className="text-[10px] font-bold text-gray-900 truncate uppercase">{file.name}</p>
+                                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tabular-nums">{Math.round(file.size / 1024 / 1024)} MB</p>
                                                                 </div>
                                                             </div>
                                                             <button
                                                                 onClick={(e) => { e.preventDefault(); handleUpload(); }}
-                                                                className="w-full bg-gray-900 text-white py-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-2xl shadow-gray-200"
+                                                                className="w-full bg-gray-900 text-white py-4 rounded-none font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-gray-100"
                                                             >
-                                                                Initiate Sequence
+                                                                Start Upload
                                                             </button>
                                                         </div>
                                                     )}
@@ -684,41 +668,38 @@ export default function CourseManagementPage() {
                                             )}
 
                                             {(uploadStatus === 'uploading' || uploadStatus === 'processing') && (
-                                                <div className="w-full py-8 flex flex-col items-center gap-8">
-                                                    <div className="relative w-20 h-20">
-                                                        <div className="absolute inset-0 border-4 border-blue-50 rounded-full" />
-                                                        <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin" />
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Loader2 className="w-6 h-6 text-blue-600" />
-                                                        </div>
+                                                <div className="w-full py-8 flex flex-col items-center gap-6">
+                                                    <div className="relative w-12 h-12">
+                                                        <div className="absolute inset-0 border-2 border-gray-100 rounded-full" />
+                                                        <div className="absolute inset-0 border-2 border-blue-600 rounded-full border-t-transparent animate-spin" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase text-gray-900 tracking-[0.4em] mb-2">{uploadStatus === 'uploading' ? 'Streaming Matrix' : 'Refactoring Signal'}</p>
-                                                        <p className="text-[10px] text-blue-600 font-black tracking-widest italic">{progress}% Cohesion</p>
+                                                        <p className="text-[10px] font-bold uppercase text-gray-900 tracking-widest mb-1">{uploadStatus === 'uploading' ? 'Uploading...' : 'Processing...'}</p>
+                                                        <p className="text-[9px] text-blue-600 font-bold">{progress}%</p>
                                                     </div>
                                                 </div>
                                             )}
                                             
                                             {uploadStatus === 'success' && (
-                                                <div className="w-full py-8 flex flex-col items-center gap-6">
-                                                    <div className="w-20 h-20 bg-emerald-500 text-white rounded-[2rem] flex items-center justify-center shadow-2xl shadow-emerald-200">
-                                                        <CheckCircle2 className="w-10 h-10" />
+                                                <div className="w-full py-8 flex flex-col items-center gap-4">
+                                                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-none flex items-center justify-center border border-emerald-100">
+                                                        <CheckCircle2 className="w-6 h-6" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase text-emerald-600 tracking-[0.4em] mb-4">Ingestion Complete</p>
-                                                        <button onClick={() => { setUploadStatus('idle'); setFile(null); }} className="text-[10px] font-black uppercase text-gray-400 hover:text-blue-600 transition-colors tracking-widest underline underline-offset-8">New Ingestion</button>
+                                                        <p className="text-[10px] font-bold uppercase text-emerald-600 tracking-widest mb-4">Upload Successful</p>
+                                                        <button onClick={() => { setUploadStatus('idle'); setFile(null); }} className="text-[9px] font-bold uppercase text-gray-400 hover:text-blue-600 transition-colors tracking-widest underline underline-offset-4">Reset</button>
                                                     </div>
                                                 </div>
                                             )}
 
                                             {uploadStatus === 'error' && (
-                                                <div className="w-full py-8 flex flex-col items-center gap-8">
-                                                    <div className="w-20 h-20 bg-red-500 text-white rounded-[2rem] flex items-center justify-center shadow-2xl shadow-red-200">
-                                                        <AlertCircle className="w-10 h-10" />
+                                                <div className="w-full py-8 flex flex-col items-center gap-4">
+                                                    <div className="w-12 h-12 bg-red-50 text-red-600 rounded-none flex items-center justify-center border border-red-100">
+                                                        <AlertCircle className="w-6 h-6" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase text-red-600 tracking-[0.4em] mb-4">Sequence Aborted</p>
-                                                        <button onClick={() => setUploadStatus('idle')} className="text-[10px] font-black uppercase text-gray-400 hover:text-red-600 transition-colors tracking-widest underline underline-offset-8">Retry Logic</button>
+                                                        <p className="text-[10px] font-bold uppercase text-red-600 tracking-widest mb-4">Upload Failed</p>
+                                                        <button onClick={() => setUploadStatus('idle')} className="text-[9px] font-bold uppercase text-gray-400 hover:text-red-600 transition-colors tracking-widest underline underline-offset-4">Retry</button>
                                                     </div>
                                                 </div>
                                             )}
@@ -727,35 +708,28 @@ export default function CourseManagementPage() {
                                         <div className="h-px bg-gray-50 w-full" />
 
                                         {/* Library List */}
-                                        <div className="flex-1 space-y-4 overflow-y-auto max-h-[300px] pr-4 scrollbar-hide py-2">
+                                        <div className="flex-1 space-y-3 overflow-y-auto max-h-[300px] pr-2 scrollbar-hide py-2">
                                             {availableVideos.length === 0 ? (
-                                                <div className="h-full flex flex-col items-center justify-center text-center py-10 italic">
-                                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em]">Vault is Currently Empty</p>
+                                                <div className="h-full flex flex-col items-center justify-center text-center py-10">
+                                                    <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">No assets found</p>
                                                 </div>
                                             ) : (
                                                 availableVideos.map((video) => (
                                                     <button
                                                         key={video.id}
                                                         onClick={() => setSelectedLecture({ ...selectedLecture, videoAssetId: video.id, videoAsset: video })}
-                                                        className="w-full p-6 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 hover:bg-blue-50/30 transition-all text-left flex items-center justify-between group shadow-sm"
+                                                        className="w-full p-4 bg-white border border-gray-100 rounded-none hover:border-blue-200 transition-all text-left flex items-center justify-between group shadow-sm"
                                                     >
-                                                        <div className="flex flex-col truncate flex-1 pr-6">
-                                                            <span className="text-xs font-black text-gray-900 group-hover:text-blue-600 uppercase truncate tracking-tight mb-2 leading-none transition-colors">{video.name || video.id.split('-')[0]}</span>
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex gap-1.5">
-                                                                    {(video.qualities || ['1080p', '480p']).map((q: string) => (
-                                                                        <span key={q} className="text-[7px] font-black text-gray-400 border border-gray-100 px-2 py-0.5 rounded-md uppercase tracking-widest leading-none bg-white">
-                                                                            {q}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                                <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest tabular-nums italic">
+                                                        <div className="flex flex-col truncate flex-1 pr-4">
+                                                            <span className="text-[10px] font-bold text-gray-900 group-hover:text-blue-600 uppercase truncate tracking-widest mb-1 transition-colors">{video.name || video.id.split('-')[0]}</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest tabular-nums">
                                                                     {new Date(video.createdAt).toLocaleDateString()}
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div className="w-10 h-10 bg-gray-50 group-hover:bg-blue-600 group-hover:text-white rounded-xl transition-all flex items-center justify-center shrink-0">
-                                                            <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                                        <div className="w-8 h-8 bg-gray-50 group-hover:bg-gray-900 group-hover:text-white rounded-none transition-all flex items-center justify-center shrink-0">
+                                                            <Plus className="w-4 h-4" />
                                                         </div>
                                                     </button>
                                                 ))

@@ -109,49 +109,54 @@ export default function CoursePlayerPage() {
     });
 
     return (
-        <div className="min-h-screen bg-white text-gray-900 flex flex-col italic font-sans selection:bg-blue-100">
+        <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans selection:bg-blue-100">
             {/* Player Header */}
-            <header className="h-20 border-b border-gray-100 bg-white/80 backdrop-blur-xl px-10 flex items-center justify-between sticky top-0 z-50 shadow-sm shadow-gray-100/50">
-                <div className="flex items-center gap-8">
-                    <Link href={`/${course.slug}`} className="p-3 hover:bg-gray-50 rounded-2xl transition-all group border border-transparent hover:border-gray-200">
-                        <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+            <header className="h-20 border-b border-gray-100 bg-white/60 backdrop-blur-2xl px-10 flex items-center justify-between sticky top-0 z-50">
+                <div className="flex items-center gap-10">
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="w-9 h-9 bg-gray-900 rounded-sm flex items-center justify-center group-hover:bg-blue-600 transition-all shadow-lg shadow-gray-100">
+                            <span className="text-white font-bold text-lg">A</span>
+                        </div>
                     </Link>
                     <div className="h-6 w-px bg-gray-100" />
+                    <Link href={`/${course.slug}`} className="p-2 hover:bg-gray-50 rounded-none transition-all group">
+                        <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                    </Link>
                     <div className="flex flex-col">
-                        <h1 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1 leading-none">
+                        <h1 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 leading-none">
                             {course.title}
                         </h1>
-                        <p className="text-lg font-black uppercase tracking-tight text-gray-900 truncate max-w-md leading-none">
-                            {activeLecture?.title || "Course Introduction"}
+                        <p className="text-lg font-bold uppercase tracking-tight text-gray-900 truncate max-w-md leading-none">
+                            {activeLecture?.title || "Overview"}
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-8">
                     {!isPurchased && (
                         <button
                             onClick={handleBuy}
                             disabled={purchasing}
-                            className="bg-gray-900 text-white px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all disabled:opacity-50 shadow-xl shadow-gray-200"
+                            className="bg-gray-900 text-white px-8 py-3 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all disabled:opacity-50 shadow-xl shadow-gray-100"
                         >
-                            {purchasing ? "Processing..." : `Secure Access — ₹${course.price}`}
+                            {purchasing ? "Processing..." : `Enroll — ₹${course.price}`}
                         </button>
                     )}
-                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center border border-blue-100">
-                        <span className="text-[10px] font-black">{session?.user?.name?.[0]}</span>
+                    <div className="w-10 h-10 bg-gray-50 text-gray-400 rounded-none flex items-center justify-center border border-gray-100">
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{session?.user?.name?.[0]}</span>
                     </div>
                 </div>
             </header>
 
             <main className="flex-1 flex overflow-hidden relative">
                 {/* Background Mesh & Grid */}
-                <div className="fixed inset-0 bg-gradient-mesh opacity-20 z-0 pointer-events-none" />
-                <div className="fixed inset-0 bg-grid opacity-[0.01] z-0 pointer-events-none" />
+                <div className="fixed inset-0 bg-gradient-mesh opacity-80 z-0 pointer-events-none" />
+                <div className="fixed inset-0 bg-grid opacity-100 z-0 pointer-events-none" />
 
                 {/* Left: Video Player */}
                 <div className="flex-1 overflow-y-auto relative z-10 custom-scrollbar">
                     <div className="max-w-[1400px] mx-auto p-10 md:p-16">
-                        <div className="aspect-video bg-gray-50 rounded-[3rem] overflow-hidden border border-gray-100 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.1)] relative mb-16 ring-8 ring-white">
+                        <div className="aspect-video bg-gray-50 rounded-none overflow-hidden border border-gray-100 shadow-2xl relative mb-16 ring-1 ring-gray-100">
                             {isPurchased ? (
                                 activeLecture ? (
                                     <VideoPlayer
@@ -161,22 +166,22 @@ export default function CoursePlayerPage() {
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
-                                        <PlayCircle className="w-20 h-20 text-gray-100 mb-8" />
-                                        <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Select a module to begin</p>
+                                        <PlayCircle className="w-16 h-16 text-gray-100 mb-8" />
+                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Select a module to begin</p>
                                     </div>
                                 )
                             ) : (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 bg-white/80 backdrop-blur-3xl">
-                                    <div className="w-24 h-24 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-center justify-center mb-10 shadow-inner">
-                                        <Lock className="w-8 h-8 text-blue-600" />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 bg-white/95 backdrop-blur-sm">
+                                    <div className="w-20 h-20 bg-gray-50 border border-gray-100 rounded-none flex items-center justify-center mb-10">
+                                        <Lock className="w-8 h-8 text-gray-400" />
                                     </div>
-                                    <h3 className="text-4xl font-black mb-4 uppercase tracking-tighter text-gray-900">Module Encrypted</h3>
-                                    <p className="text-gray-500 text-sm mb-12 max-w-xs font-medium italic">
-                                        Unlock the full premium experience and join hundreds of other architectural masters.
+                                    <h3 className="text-3xl font-bold mb-4 uppercase tracking-tighter text-gray-900">Enrollment Required</h3>
+                                    <p className="text-gray-500 text-sm mb-12 max-w-xs font-medium">
+                                        Please enroll in the course to access this professional lecture.
                                     </p>
                                     <button
                                         onClick={handleBuy}
-                                        className="bg-gray-900 text-white px-12 py-6 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl shadow-gray-300 hover:scale-105 hover:bg-blue-600 transition-all"
+                                        className="bg-gray-900 text-white px-10 py-5 rounded-none text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-gray-100 hover:bg-blue-600 transition-all"
                                     >
                                         Enroll Now — ₹{course.price}
                                     </button>
@@ -186,30 +191,30 @@ export default function CoursePlayerPage() {
 
                         <div className="max-w-5xl space-y-12">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="h-1 w-8 bg-blue-600 rounded-full" />
-                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Lecture Deep Dive</p>
+                                <span className="h-0.5 w-6 bg-blue-600" />
+                                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Module Content</p>
                             </div>
                             <div>
-                                <h2 className="text-5xl font-black uppercase tracking-tighter mb-6 text-gray-900 leading-none">
+                                <h2 className="text-5xl font-bold uppercase tracking-tighter mb-6 text-gray-900 leading-none">
                                     {activeLecture?.title || course.title}
                                 </h2>
-                                <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-300">
-                                    <span className="flex items-center gap-2"><PlayCircle className="w-4 h-4" /> HD Masters</span>
-                                    <span className="flex items-center gap-2 text-emerald-500"><CheckCircle2 className="w-4 h-4" /> Lifetime Access</span>
+                                <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                    <span className="flex items-center gap-2">Engineering Content</span>
+                                    <span className="flex items-center gap-2 text-emerald-600">Secure Access</span>
                                 </div>
                             </div>
 
                             <div className="h-px bg-gray-100 w-full" />
 
                             {activeLecture?.description ? (
-                                <div className="prose prose-blue max-w-none bg-white/50 backdrop-blur-sm p-12 rounded-[2.5rem] border border-gray-100 font-medium leading-relaxed italic text-gray-500 shadow-sm">
+                                <div className="prose prose-blue max-w-none bg-white p-12 border border-gray-100 font-medium leading-relaxed text-gray-600 shadow-sm">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {activeLecture.description}
                                     </ReactMarkdown>
                                 </div>
                             ) : course.description && (
-                                <p className="text-gray-400 font-medium leading-relaxed text-xl max-w-3xl italic">
-                                    "{course.description}"
+                                <p className="text-gray-400 font-medium leading-relaxed text-xl max-w-3xl">
+                                    {course.description}
                                 </p>
                             )}
                         </div>
@@ -217,44 +222,40 @@ export default function CoursePlayerPage() {
                 </div>
 
                 {/* Right: Curriculum Index */}
-                <aside className="w-[400px] border-l border-gray-100 bg-white/50 backdrop-blur-xl hidden lg:flex flex-col relative z-20">
-                    <div className="p-10 border-b border-gray-100 bg-white/50">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600 mb-2">Curriculum</h3>
-                        <p className="text-xl font-black uppercase tracking-tight text-gray-900">Knowledge Index</p>
+                <aside className="w-[380px] border-l border-gray-100 bg-white hidden lg:flex flex-col relative z-20">
+                    <div className="p-8 border-b border-gray-100">
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Curriculum</h3>
+                        <p className="text-xl font-bold uppercase tracking-tight text-gray-900">Course Index</p>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-10">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-10">
                         {Object.entries(groupedLectures).map(([section, lectures], sIdx) => (
                             <div key={section} className="space-y-6">
-                                <h4 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-3">
-                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                                <h4 className="px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 flex items-center gap-3">
                                     {section}
                                 </h4>
-                                <div className="space-y-4">
+                                <div className="space-y-2">
                                     {lectures.map((lecture, lIdx) => (
                                         <button
                                             key={lecture.id}
                                             disabled={!isPurchased}
                                             onClick={() => setActiveLecture(lecture)}
-                                            className={`w-full p-5 rounded-[2rem] flex items-center gap-5 transition-all text-left group disabled:opacity-40 ${activeLecture?.id === lecture.id ? 'bg-white shadow-[0_15px_40px_-10px_rgba(37,99,235,0.15)] border border-blue-100' : 'hover:bg-white border border-transparent hover:border-gray-100'}`}
+                                            className={`w-full p-4 rounded-none flex items-center gap-5 transition-all text-left group disabled:opacity-40 ${activeLecture?.id === lecture.id ? 'bg-gray-50 border-l-4 border-l-blue-600' : 'hover:bg-gray-50 border-l-4 border-l-transparent'}`}
                                         >
-                                            <div className={`w-10 h-10 flex-shrink-0 rounded-2xl flex items-center justify-center text-[10px] font-black transition-all ${activeLecture?.id === lecture.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110' : 'bg-gray-50 border border-gray-100 text-gray-400 group-hover:bg-white group-hover:border-blue-200 group-hover:text-blue-600'}`}>
+                                            <div className={`w-8 h-8 flex-shrink-0 rounded-none flex items-center justify-center text-[10px] font-bold transition-all ${activeLecture?.id === lecture.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400 group-hover:bg-gray-100 group-hover:text-blue-600'}`}>
                                                 {(lIdx + 1).toString().padStart(2, '0')}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h4 className={`text-[11px] font-black uppercase tracking-tight truncate ${activeLecture?.id === lecture.id ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'}`}>
+                                                <h4 className={`text-[10px] font-bold uppercase tracking-tight truncate ${activeLecture?.id === lecture.id ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'}`}>
                                                     {lecture.title}
                                                 </h4>
                                                 {!isPurchased && (
-                                                    <div className="flex items-center gap-1.5 opacity-50 mt-1">
-                                                        <Lock className="w-2.5 h-2.5 text-gray-400" />
-                                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Restricted</span>
+                                                    <div className="flex items-center gap-1 opacity-50 mt-1">
+                                                        <Lock className="w-2 h-2 text-gray-400" />
+                                                        <span className="text-[7px] font-bold uppercase tracking-widest text-gray-400">Restricted</span>
                                                     </div>
                                                 )}
                                             </div>
-                                            {activeLecture?.id === lecture.id && (
-                                                <div className="w-2 h-2 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.5)]" />
-                                            )}
                                         </button>
                                     ))}
                                 </div>

@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -9,8 +8,8 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LMS - Premium",
-  description: "Next Gen Learning Platform",
+  title: "lms.amberbisht",
+  description: "Enterprise Grade Educational Infrastructure",
 };
 
 export default function RootLayout({
