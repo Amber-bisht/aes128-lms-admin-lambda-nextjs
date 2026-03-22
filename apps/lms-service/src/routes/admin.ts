@@ -9,7 +9,10 @@ import sharp from 'sharp';
 
 const router = Router();
 const prisma = new PrismaClient();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+});
 
 // Use middleware to ensure only admins can access
 router.use(authenticateJWT);
