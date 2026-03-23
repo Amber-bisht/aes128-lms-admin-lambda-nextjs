@@ -181,9 +181,9 @@ export default async function Home() {
                       <div className="flex items-center gap-6 border-b border-gray-50 pb-8">
                         <div className="flex items-center gap-3">
                           <span className="text-4xl font-bold text-[#001B44]">₹{course.price.toLocaleString()}</span>
-                          <span className="text-xl text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
+                          <span className="text-xl text-gray-500 line-through">₹{originalPrice.toLocaleString()}</span>
                         </div>
-                        <span className="bg-[#E7F9EE] text-[#00C853] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                        <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
                           34% off
                         </span>
                       </div>
@@ -205,7 +205,7 @@ export default async function Home() {
           <div className="max-w-4xl">
             <h2 className="text-6xl font-black text-[#001B44] tracking-tighter uppercase mb-8 leading-[0.9]">
               Stuck in <br />
-              <span className="text-emerald-500 italic">"Tutorial Hell"?</span>
+              <span className="text-emerald-600 italic">"Tutorial Hell"?</span>
             </h2>
             <p className="text-xl text-gray-500 font-medium leading-relaxed max-w-2xl">
               Most courses teach you syntax. They show you how to build a to-do list app on localhost.
@@ -218,9 +218,9 @@ export default async function Home() {
       <footer className="relative pt-40 pb-20 bg-black text-white overflow-hidden border-t border-white/10 uppercase">
         {/* Background Text Effect - AMBERBISHT */}
         <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-full text-center select-none pointer-events-none z-0 px-4">
-          <h1 className="text-[12vw] font-black tracking-tighter text-white/[0.06] leading-none uppercase italic">
+          <div className="text-[12vw] font-black tracking-tighter text-white/[0.06] leading-none uppercase italic">
             Amberbisht
-          </h1>
+          </div>
         </div>
 
         <div className="max-w-[1240px] mx-auto px-6 relative z-10">
@@ -235,7 +235,7 @@ export default async function Home() {
             </div>
 
             <div className="space-y-8">
-              <h4 className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Company</h4>
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Company</h3>
               <nav className="flex flex-col gap-5">
                 <Link href="#" className="text-[12px] font-bold text-gray-400 hover:text-white transition-all uppercase tracking-widest leading-none">Terms & Conditions</Link>
                 <Link href="#" className="text-[12px] font-bold text-gray-400 hover:text-white transition-all uppercase tracking-widest leading-none">Privacy Policy</Link>
@@ -258,7 +258,7 @@ export default async function Home() {
                   <Linkedin className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                 </div>
               </div>
-              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest text-center md:text-right">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center md:text-right">
                 © 2026 lms.amberbisht. All rights reserved.
               </p>
             </div>

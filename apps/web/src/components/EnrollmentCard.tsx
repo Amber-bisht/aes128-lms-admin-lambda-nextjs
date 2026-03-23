@@ -110,9 +110,9 @@ export default function EnrollmentCard({ course }: EnrollmentCardProps) {
                         <div className="flex items-center gap-4 border-b border-gray-50 pb-8">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-4xl font-bold text-[#001B44] tracking-tight tabular-nums font-lato">₹{course.price}</span>
-                                <span className="text-xl font-bold text-gray-400 tracking-tight line-through font-lato">₹8,999</span>
+                                <span className="text-xl font-bold text-gray-500 tracking-tight line-through font-lato">₹8,999</span>
                             </div>
-                            <div className="bg-emerald-50 text-emerald-500 px-3 py-1 rounded-full text-[12px] font-bold border border-emerald-100/30 whitespace-nowrap">
+                            <div className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[12px] font-bold border border-emerald-100/30 whitespace-nowrap">
                                 34% off
                             </div>
                         </div>

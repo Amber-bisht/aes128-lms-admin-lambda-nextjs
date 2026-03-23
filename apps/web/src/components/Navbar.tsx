@@ -75,6 +75,7 @@ export default function Navbar() {
                     <button
                         className="md:hidden p-2 text-gray-900"
                         onClick={toggleMenu}
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     >
                         {isMenuOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
                     </button>

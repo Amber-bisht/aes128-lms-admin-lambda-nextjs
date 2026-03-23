@@ -78,12 +78,8 @@ export default function CreateCourseModal({ isOpen, onClose, onSuccess }: Create
                         <div className="p-8 md:p-12">
                             <div className="flex justify-between items-start mb-12">
                                 <div>
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <Sparkles className="w-4 h-4 text-blue-600" />
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600">New Curriculum</span>
-                                    </div>
                                     <h2 className="text-4xl font-bold uppercase tracking-tighter text-gray-900 leading-none">
-                                        Initialize <span className="text-blue-600">Course</span>
+                                        Add <span className="text-blue-600">Course</span>
                                     </h2>
                                 </div>
                                 <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 transition-colors">
