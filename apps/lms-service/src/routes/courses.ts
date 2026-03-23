@@ -40,6 +40,33 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 
+// GET purchased courses for logged in user
+router.get('/purchased', authenticateJWT, async (req: any, res: Response) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            include: { 
+                courses: { 
+                    where: { active: true },
+                    orderBy: { createdAt: 'desc' }
+                } 
+            }
+        });
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const signedCourses = user.courses.map(course => ({
+            ...course,
+            imageUrl: course.imageUrl ? getSignedVideoUrl(extractKey(course.imageUrl), 604800) : course.imageUrl
+        }));
+
+        res.json(signedCourses);
+    } catch (error) {
+        console.error('Fetch Purchased Courses Error:', error);
+        res.status(500).json({ error: 'Failed to fetch enrolled courses' });
+    }
+});
+
 // GET course by ID or Slug - Optional Auth
 router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;

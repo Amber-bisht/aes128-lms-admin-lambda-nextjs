@@ -11,7 +11,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (session?.user) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/purchased`, {
                 headers: {
                     "Authorization": `Bearer ${(session as any).appToken}`
                 }

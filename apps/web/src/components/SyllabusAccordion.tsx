@@ -93,7 +93,11 @@ export default function SyllabusAccordion({ groupedLectures, course }: SyllabusA
                         window.location.reload();
                     }
                 },
-                theme: { color: "#ffffff" }
+                theme: { color: "#ffffff" },
+                prefill: {
+                    email: session.user?.email || "",
+                    contact: "9999999999"
+                }
             };
 
             const rzp = new (window as any).Razorpay(options);

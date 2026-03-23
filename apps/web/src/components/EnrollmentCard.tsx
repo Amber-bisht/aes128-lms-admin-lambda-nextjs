@@ -75,7 +75,11 @@ export default function EnrollmentCard({ course }: EnrollmentCardProps) {
                         window.location.reload();
                     }
                 },
-                theme: { color: "#ffffff" }
+                theme: { color: "#ffffff" },
+                prefill: {
+                    email: session.user?.email || "",
+                    contact: "9999999999"
+                }
             };
 
             const rzp = new (window as any).Razorpay(options);
@@ -120,7 +124,7 @@ export default function EnrollmentCard({ course }: EnrollmentCardProps) {
                             disabled={purchasing}
                             className="w-full bg-[#001030] text-white py-5 rounded-none font-bold text-lg text-center transition-all hover:bg-black hover:scale-[1.01] active:scale-[0.98] shadow-xl shadow-blue-900/10 flex items-center justify-center disabled:opacity-50"
                         >
-                            {purchasing ? "Processing..." : isPurchased ? "Start Learning" : "Buy Now"}
+                            {purchasing ? "Processing..." : isPurchased ? "Access Now" : "Buy Now"}
                         </button>
                     </div>
                 </div>

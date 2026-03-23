@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { Youtube, Twitter, Instagram, Linkedin, ArrowRight, Star, Globe, Clock, ChevronRight } from "lucide-react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
-async function getCourses() {
+async function getCourses(token?: string) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
       next: { revalidate: 3600 },
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
       signal: controller.signal
     });
     
@@ -22,7 +25,8 @@ async function getCourses() {
 }
 
 export default async function Home() {
-  const courses = await getCourses();
+  const session = await getServerSession(authOptions);
+  const courses = await getCourses((session as any)?.appToken);
 
   return (
     <div className="min-h-screen bg-white text-gray-900 relative overflow-hidden font-sans selection:bg-gray-900 selection:text-white">
@@ -151,14 +155,16 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {courses.map((course: any) => {
               const originalPrice = Math.round(course.price / 0.66);
+              const isPurchased = course.purchased || (session?.user as any)?.role === 'ADMIN';
+
               return (
                 <Link
                   key={course.id}
-                  href={`/${course.slug}`}
+                  href={isPurchased ? `/${course.slug}/play` : `/${course.slug}`}
                   className="group relative flex flex-col bg-white border border-gray-100 rounded-none overflow-hidden transition-all hover:shadow-2xl hover:shadow-gray-200/50 p-4"
                 >
                   {/* Thumbnail */}
-                  <div className="relative aspect-[16/10] bg-gray-50 overflow-hidden rounded-none mb-6">
+                  <div className="relative aspect-[16/10] bg-gray-50 overflow-hidden rounded-none mb-6 border border-gray-100/50">
                     <img 
                       src={course.imageUrl || "https://www.amberbisht.me/hero-profile.webp"} 
                       alt={course.title}
@@ -182,9 +188,9 @@ export default async function Home() {
                          </span>
                        </div>
  
-                       {/* Buy Now Button */}
-                       <div className="w-full py-5 bg-[#001B44] text-white rounded-none font-bold text-center group-hover:bg-[#002866] transition-colors text-lg">
-                         Buy Now
+                       {/* Action Button */}
+                       <div className="w-full py-5 bg-[#001B44] text-white rounded-none font-bold text-center group-hover:bg-[#002866] transition-colors text-lg uppercase tracking-widest">
+                         {isPurchased ? "Access Now" : "Buy Now"}
                        </div>
                      </div>
                    </div>
