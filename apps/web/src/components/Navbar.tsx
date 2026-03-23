@@ -19,10 +19,10 @@ export default function Navbar() {
     const NavLinks = () => (
         <>
             <Link href="/courses" onClick={() => setIsMenuOpen(false)} className="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors">Courses</Link>
-            <a 
-                href="https://github.com/Amber-bisht/aes128-lms-admin-lambda-nextjs" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+            <a
+                href="https://github.com/Amber-bisht/aes128-lms-admin-lambda-nextjs"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
             >
@@ -72,7 +72,7 @@ export default function Navbar() {
                     </div>
 
                     {/* Mobile Hamburger Toggle */}
-                    <button 
+                    <button
                         className="md:hidden p-2 text-gray-900"
                         onClick={toggleMenu}
                     >

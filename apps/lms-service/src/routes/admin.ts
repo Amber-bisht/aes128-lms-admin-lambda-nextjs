@@ -204,7 +204,7 @@ router.get('/users', async (req: Request, res: Response) => {
 // Update Lecture
 router.patch('/lectures/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { title, description, section, order, videoAssetId, videoUrl } = req.body;
+    const { title, description, section, order, videoAssetId, videoUrl, imageUrl } = req.body;
 
     try {
         const lecture = await prisma.lecture.update({
@@ -215,7 +215,8 @@ router.patch('/lectures/:id', async (req: Request, res: Response) => {
                 section,
                 order,
                 videoAssetId,
-                videoUrl
+                videoUrl,
+                imageUrl
             },
             include: { videoAsset: true }
         });

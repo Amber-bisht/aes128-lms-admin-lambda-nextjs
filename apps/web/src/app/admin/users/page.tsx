@@ -70,7 +70,6 @@ export default function AdminUsersPage() {
                                 <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Admin Console</p>
                             </div>
                             <h1 className="text-5xl font-bold tracking-tighter mb-4 uppercase text-gray-900 leading-none">User <span className="text-blue-600">Management</span></h1>
-                            <p className="text-gray-400 font-medium">Monitoring student enrollment and program participation.</p>
                         </div>
                         <div className="bg-gray-50 border border-gray-100 px-6 py-3 rounded-none flex items-center gap-4">
                             <Users className="w-5 h-5 text-gray-400" />
@@ -95,15 +94,8 @@ export default function AdminUsersPage() {
                                     <tr key={user.id} className="group hover:bg-blue-50/30 transition-all duration-500">
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-6">
-                                                <div className="w-12 h-12 rounded-none bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden text-lg font-bold">
-                                                    {user.image ? (
-                                                        <img src={user.image} alt="" className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" />
-                                                    ) : (
-                                                        <span className="text-gray-300 group-hover:text-blue-600">{user.email?.charAt(0).toUpperCase()}</span>
-                                                    )}
-                                                </div>
                                                 <div>
-                                                    <p className="text-lg font-bold text-gray-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors leading-none mb-1">{user.name || 'Anonymous'}</p>
+                                                    <p className="text-lg font-bold text-gray-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors leading-none mb-2">{user.name || user.email.split('@')[0]}</p>
                                                     <div className="flex items-center gap-2 text-gray-400">
                                                         <Mail className="w-3 h-3" />
                                                         <span className="text-[10px] font-bold uppercase tracking-widest">{user.email}</span>

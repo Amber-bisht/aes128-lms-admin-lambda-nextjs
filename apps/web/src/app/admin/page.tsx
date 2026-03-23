@@ -2,32 +2,46 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusCircle, Video, BookOpen, Loader2, Users, ChevronRight } from "lucide-react";
+import CreateCourseModal from "@/components/CreateCourseModal";
 
 export default function AdminDashboard() {
     const { data: session, status } = useSession();
     const [courses, setCourses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const isAdmin = (session?.user as any)?.role === 'ADMIN';
 
+    const router = useRouter();
+
+    const fetchCourses = () => {
+        setLoading(true);
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
+            headers: {
+                "Authorization": `Bearer ${(session as any).appToken}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                setCourses(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    };
+
+    const handleCourseCreated = (course: any) => {
+        router.push(`/admin/course/${course.slug}`);
+    };
+
     useEffect(() => {
         if (status === "authenticated" && isAdmin) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses`, {
-                headers: {
-                    "Authorization": `Bearer ${(session as any).appToken}`
-                }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    setCourses(data);
-                    setLoading(false);
-                })
-                .catch(err => {
-                    console.error(err);
-                    setLoading(false);
-                });
+            fetchCourses();
         }
     }, [status, isAdmin, session]);
 
@@ -65,29 +79,28 @@ export default function AdminDashboard() {
 
             <div className="max-w-[1240px] mx-auto px-6 py-16 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-20">
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <span className="h-0.5 w-6 bg-blue-600" />
-                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Admin Console</p>
-                        </div>
-                        <h1 className="text-5xl font-bold tracking-tighter uppercase text-gray-900 leading-none">
-                            Admin <span className="text-blue-600">Dashboard</span>
-                        </h1>
-                    </div>
-                    <Link
-                        href="/admin/create-course"
+                    <h1 className="text-5xl font-bold tracking-tighter uppercase text-gray-900 leading-none">
+                        Admin <span className="text-blue-600">Dashboard</span>
+                    </h1>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
                         className="flex items-center gap-4 bg-gray-900 text-white hover:bg-blue-600 px-8 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-gray-100 active:scale-95 group"
                     >
                         <PlusCircle className="w-4 h-4" />
                         Add Course
-                    </Link>
+                    </button>
                 </div>
 
+                <CreateCourseModal 
+                    isOpen={isModalOpen} 
+                    onClose={() => setIsModalOpen(false)} 
+                    onSuccess={handleCourseCreated} 
+                />
+
                 {/* Stats Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                     {[
                         { label: "Total Courses", value: courses.length, icon: BookOpen, color: "blue" },
-                        { label: "Total Lectures", value: courses.reduce((acc, curr) => acc + (curr.lectures?.length || 0), 0), icon: Video, color: "emerald" },
                         { label: "User Management", value: "Manage", icon: Users, color: "purple", href: "/admin/users" }
                     ].map((stat, i) => {
                         const Content = (

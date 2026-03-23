@@ -507,68 +507,40 @@ export default function CourseManagementPage() {
 
                         {/* Editor Sections */}
                         <div className="flex-1 overflow-y-auto p-16 space-y-24 scrollbar-hide pb-40">
-                            {/* Detailed Info Panel: Image + Meta */}
-                            <section className="grid grid-cols-1 lg:grid-cols-3 gap-16">
-                                <div className="lg:col-span-1 space-y-8">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <span className="h-0.5 w-6 bg-blue-600" />
-                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Cover Image</h3>
-                                    </div>
-                                    <div className="aspect-video bg-gray-50 border-2 border-dashed border-gray-100 rounded-none relative overflow-hidden group">
-                                        {selectedLecture.imageUrl ? (
-                                            <>
-                                                <img src={selectedLecture.imageUrl} alt="Lecture" className="w-full h-full object-cover transition-all duration-500 opacity-80" />
-                                                <div className="absolute inset-0 bg-white/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center p-12 text-center">
-                                                    <label className="cursor-pointer bg-gray-900 text-white px-8 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all">Change Image</label>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
-                                                <div className="w-12 h-12 bg-white border border-gray-100 rounded-none flex items-center justify-center mb-6">
-                                                    <ImageIcon className="w-6 h-6 text-gray-200" />
-                                                </div>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-8">No image selected</p>
-                                                <label className="cursor-pointer bg-white border border-gray-100 px-8 py-4 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">Upload Image</label>
-                                            </div>
-                                        )}
-                                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleUploadImage} />
-                                    </div>
+                            {/* Detailed Info Panel: Meta */}
+                            <section className="space-y-10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <span className="h-0.5 w-6 bg-blue-600" />
+                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Lecture Details</h3>
                                 </div>
-
-                                <div className="lg:col-span-2 space-y-10">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <span className="h-0.5 w-6 bg-blue-600" />
-                                        <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Lecture Details</h3>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-10">
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Lecture Title</label>
-                                            <input
-                                                type="text"
-                                                value={selectedLecture.title}
-                                                onChange={(e) => setSelectedLecture({ ...selectedLecture, title: e.target.value })}
-                                                className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
-                                            />
-                                        </div>
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Section Name</label>
-                                            <input
-                                                type="text"
-                                                value={selectedLecture.section || ''}
-                                                onChange={(e) => setSelectedLecture({ ...selectedLecture, section: e.target.value })}
-                                                className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
-                                            />
-                                        </div>
-                                    </div>
+                                <div className="grid grid-cols-2 gap-10">
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Lecture Description (Markdown)</label>
-                                        <textarea
-                                            value={selectedLecture.description || ''}
-                                            onChange={(e) => setSelectedLecture({ ...selectedLecture, description: e.target.value })}
-                                            className="w-full bg-white border border-gray-100 rounded-none px-8 py-8 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-medium h-64 resize-none leading-relaxed"
-                                            placeholder="Enter lecture description..."
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Lecture Title</label>
+                                        <input
+                                            type="text"
+                                            value={selectedLecture.title}
+                                            onChange={(e) => setSelectedLecture({ ...selectedLecture, title: e.target.value })}
+                                            className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
                                         />
                                     </div>
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Section Name</label>
+                                        <input
+                                            type="text"
+                                            value={selectedLecture.section || ''}
+                                            onChange={(e) => setSelectedLecture({ ...selectedLecture, section: e.target.value })}
+                                            className="w-full bg-white border border-gray-100 rounded-none px-6 py-4 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold uppercase tracking-tight"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Lecture Description (Markdown)</label>
+                                    <textarea
+                                        value={selectedLecture.description || ''}
+                                        onChange={(e) => setSelectedLecture({ ...selectedLecture, description: e.target.value })}
+                                        className="w-full bg-white border border-gray-100 rounded-none px-8 py-8 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:border-blue-600 transition-all font-medium h-64 resize-none leading-relaxed"
+                                        placeholder="Enter lecture description..."
+                                    />
                                 </div>
                             </section>
 

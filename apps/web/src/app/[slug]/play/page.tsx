@@ -113,10 +113,8 @@ export default function CoursePlayerPage() {
             {/* Player Header */}
             <header className="h-20 border-b border-gray-100 bg-white/60 backdrop-blur-2xl px-10 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-10">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-9 h-9 bg-gray-900 rounded-sm flex items-center justify-center group-hover:bg-blue-600 transition-all shadow-lg shadow-gray-100">
-                            <span className="text-white font-bold text-lg">A</span>
-                        </div>
+                    <Link href="/" className="font-bold text-xl tracking-tight text-gray-900 leading-none">
+                        lms.<span className="text-amber-500">amberbisht</span>
                     </Link>
                     <div className="h-6 w-px bg-gray-100" />
                     <Link href={`/${course.slug}`} className="p-2 hover:bg-gray-50 rounded-none transition-all group">
