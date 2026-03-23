@@ -146,14 +146,14 @@ export default function CoursePlayerPage() {
                 </div>
             </header>
 
-            <main className="flex-1 flex overflow-hidden relative">
+            <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
                 {/* Background Mesh & Grid */}
                 <div className="fixed inset-0 bg-gradient-mesh opacity-80 z-0 pointer-events-none" />
                 <div className="fixed inset-0 bg-grid opacity-100 z-0 pointer-events-none" />
 
                 {/* Left: Video Player */}
                 <div className="flex-1 overflow-y-auto relative z-10 custom-scrollbar">
-                    <div className="max-w-[1400px] mx-auto p-10 md:p-16">
+                    <div className="max-w-[1400px] mx-auto p-6 md:p-16">
                         <div className="aspect-video bg-gray-50 rounded-none overflow-hidden border border-gray-100 shadow-2xl relative mb-16 ring-1 ring-gray-100">
                             {isPurchased ? (
                                 activeLecture ? (
@@ -212,7 +212,7 @@ export default function CoursePlayerPage() {
                 </div>
 
                 {/* Right: Curriculum Index */}
-                <aside className="w-[380px] border-l border-gray-100 bg-white hidden lg:flex flex-col relative z-20">
+                <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-gray-100 bg-white flex flex-col relative z-20 overflow-y-auto lg:overflow-visible">
                     <div className="p-8 border-b border-gray-100">
                         <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Curriculum</h3>
                         <p className="text-xl font-bold uppercase tracking-tight text-gray-900">Course Index</p>
