@@ -18,7 +18,7 @@ export default function Navbar() {
 
     const NavLinks = () => (
         <>
-            <Link href="#courses" onClick={() => setIsMenuOpen(false)} className="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors">Courses</Link>
+            <Link href="/courses" onClick={() => setIsMenuOpen(false)} className="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors">Courses</Link>
             <a 
                 href="https://github.com/Amber-bisht/aes128-lms-admin-lambda-nextjs" 
                 target="_blank" 

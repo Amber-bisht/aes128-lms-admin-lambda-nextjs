@@ -21,21 +21,50 @@ const extractKey = (urlStr: string) => {
     }
 };
 
-// GET all active courses - Public
+// GET all active courses - Public with Optional Auth
 router.get('/', async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+    let userId: string | null = null;
+
+    // Optional JWT verification
+    if (authHeader) {
+        try {
+            const token = authHeader.split(' ')[1];
+            const decoded: any = jwt.verify(token, JWT_SECRET);
+            userId = decoded.id;
+        } catch (e) {
+            // Invalid token, treat as public
+        }
+    }
+
     try {
         const courses = await prisma.course.findMany({
             where: { active: true },
             orderBy: { createdAt: 'desc' }
         });
 
+        // If user is logged in, mark purchased courses
+        let purchasedCourseIds: string[] = [];
+        let isAdmin = false;
+
+        if (userId) {
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: { courses: { select: { id: true } } }
+            });
+            purchasedCourseIds = user?.courses.map(c => c.id) || [];
+            isAdmin = user?.role === 'ADMIN';
+        }
+
         const signedCourses = courses.map(course => ({
             ...course,
-            imageUrl: course.imageUrl ? getSignedVideoUrl(extractKey(course.imageUrl), 604800) : course.imageUrl
+            imageUrl: course.imageUrl ? getSignedVideoUrl(extractKey(course.imageUrl), 604800) : course.imageUrl,
+            purchased: isAdmin || purchasedCourseIds.includes(course.id)
         }));
 
         res.json(signedCourses);
     } catch (error) {
+        console.error('Fetch All Courses Error:', error);
         res.status(500).json({ error: 'Failed to fetch courses' });
     }
 });
