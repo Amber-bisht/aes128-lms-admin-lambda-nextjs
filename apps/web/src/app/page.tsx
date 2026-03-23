@@ -37,12 +37,12 @@ export default async function Home() {
           <div className="flex flex-col lg:flex-row items-start justify-between gap-16 lg:gap-32">
             {/* Left Column: Text Content */}
             <div className="flex-1 max-w-2xl">
-              <h1 className="text-7xl md:text-[6.5rem] font-black tracking-tighter leading-[0.85] mb-12 uppercase">
-                <span className="text-emerald-800">Become a</span><br />
-                <span className="text-emerald-500 whitespace-nowrap">100x dev</span><br />
-                <span className="text-teal-600">with</span> <br />
-                <span className="text-green-400 whitespace-nowrap">Amber Bisht</span>
-              </h1>
+                <h1 className="text-5xl md:text-[6.5rem] font-black tracking-tighter leading-[0.85] mb-12 uppercase">
+                  <span className="text-emerald-800">Become a</span><br />
+                  <span className="text-emerald-500 whitespace-nowrap">100x dev</span><br />
+                  <span className="text-teal-600">with</span> <br />
+                  <span className="text-green-400">Amber Bisht</span>
+                </h1>
 
               <p className="text-xl text-gray-600 max-w-xl font-medium leading-[1.6] mb-12">
                 The only platform designed for engineers who want to build high-scale products,
@@ -50,7 +50,7 @@ export default async function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-6">
-                <Link href="#courses" className="bg-gray-900 text-white px-12 py-6 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center gap-4 group shadow-2xl shadow-gray-200">
+                <Link href="#courses" className="bg-gray-900 text-white px-12 py-6 rounded-none text-sm font-black uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center gap-4 group shadow-2xl shadow-gray-200">
                   Explore Curriculum
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
@@ -155,10 +155,10 @@ export default async function Home() {
                 <Link
                   key={course.id}
                   href={`/${course.slug}`}
-                  className="group relative flex flex-col bg-white border border-gray-100 rounded-[2rem] overflow-hidden transition-all hover:shadow-2xl hover:shadow-gray-200/50 p-4"
+                  className="group relative flex flex-col bg-white border border-gray-100 rounded-none overflow-hidden transition-all hover:shadow-2xl hover:shadow-gray-200/50 p-4"
                 >
                   {/* Thumbnail */}
-                  <div className="relative aspect-[16/10] bg-gray-50 overflow-hidden rounded-[1.5rem] mb-6">
+                  <div className="relative aspect-[16/10] bg-gray-50 overflow-hidden rounded-none mb-6">
                     <img 
                       src={course.imageUrl || "https://www.amberbisht.me/hero-profile.webp"} 
                       alt={course.title}
@@ -166,41 +166,45 @@ export default async function Home() {
                     />
                   </div>
 
-                  {/* Content */}
-                  <div className="px-4 pb-4 flex flex-col flex-1">
-                    <h3 className="text-2xl font-bold text-[#001B44] mb-4 leading-tight">
-                      {course.title}
-                    </h3>
-                    
-                    <p className="text-gray-500 text-sm font-medium line-clamp-2 leading-relaxed mb-6">
-                      {course.description}
-                    </p>
-
-                    <div className="mt-auto space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl font-bold text-[#001B44]">₹{course.price.toLocaleString()}</span>
-                          <span className="text-lg text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
-                        </div>
-                        <span className="bg-[#E7F9EE] text-[#00C853] px-3 py-1 rounded-full text-xs font-bold">
-                          34% off
-                        </span>
-                      </div>
-
-                      {/* Currency Symbol Box */}
-                      <div className="w-full py-3 px-4 bg-white border border-gray-100 rounded-xl flex items-center justify-between text-gray-500 font-medium">
-                        <span>INR</span>
-                      </div>
-
-                      {/* View Details Button */}
-                      <div className="w-full py-4 bg-[#001B44] text-white rounded-xl font-bold text-center group-hover:bg-[#002866] transition-colors">
-                        View Details
-                      </div>
-                    </div>
-                  </div>
+                   {/* Content */}
+                   <div className="px-4 pb-4 flex flex-col flex-1">
+                     <h3 className="text-2xl font-bold text-[#001B44] mt-6 leading-tight uppercase font-outfit text-left">
+                       {course.title}
+                     </h3>
+                     <div className="mt-8 space-y-8">
+                       <div className="flex items-center gap-6 border-b border-gray-50 pb-8">
+                         <div className="flex items-center gap-3">
+                           <span className="text-4xl font-bold text-[#001B44]">₹{course.price.toLocaleString()}</span>
+                           <span className="text-xl text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
+                         </div>
+                         <span className="bg-[#E7F9EE] text-[#00C853] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                           34% off
+                         </span>
+                       </div>
+ 
+                       {/* Buy Now Button */}
+                       <div className="w-full py-5 bg-[#001B44] text-white rounded-none font-bold text-center group-hover:bg-[#002866] transition-colors text-lg">
+                         Buy Now
+                       </div>
+                     </div>
+                   </div>
                 </Link>
               );
             })}
+          </div>
+        </section>
+ 
+        {/* Philosophy Section - Tutorial Hell */}
+        <section className="max-w-[1240px] mx-auto px-6 py-24 border-t border-gray-100">
+          <div className="max-w-4xl">
+            <h2 className="text-6xl font-black text-[#001B44] tracking-tighter uppercase mb-8 leading-[0.9]">
+              Stuck in <br />
+              <span className="text-emerald-500 italic">"Tutorial Hell"?</span>
+            </h2>
+            <p className="text-xl text-gray-500 font-medium leading-relaxed max-w-2xl">
+              Most courses teach you syntax. They show you how to build a to-do list app on localhost. 
+              <span className="text-gray-900 block mt-4 font-bold">Real engineering happens when things break at scale.</span>
+            </p>
           </div>
         </section>
       </main>

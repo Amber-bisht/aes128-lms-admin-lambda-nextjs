@@ -20,6 +20,8 @@
   --color-input: hsl(240 5.9% 90%);
 
   --radius-xl: 0px;
+  --font-outfit: var(--font-outfit);
+  --font-lato: var(--font-lato);
 }
 
 @layer base {

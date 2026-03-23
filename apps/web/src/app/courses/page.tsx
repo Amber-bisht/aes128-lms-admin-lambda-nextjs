@@ -33,9 +33,9 @@ export default async function CoursesPage() {
                         <Link
                             key={course.id}
                             href={`/${course.slug}`}
-                            className="group bg-[#111] border border-white/5 rounded-[2.5rem] overflow-hidden transition-all hover:border-white/20 shadow-2xl"
+                            className="group bg-[#111] border border-white/5 rounded-none overflow-hidden transition-all hover:border-white/20 shadow-2xl p-4"
                         >
-                            <div className="aspect-video overflow-hidden relative">
+                            <div className="aspect-video overflow-hidden relative rounded-none border border-white/5">
                                 <img
                                     src={course.imageUrl || "/placeholder-course.jpg"}
                                     alt={course.title}
@@ -43,22 +43,22 @@ export default async function CoursesPage() {
                                 />
                             </div>
 
-                            <div className="p-8">
-                                <h3 className="text-2xl font-black uppercase tracking-tight mb-2 group-hover:text-blue-500 transition-colors">
+                            <div className="pt-8 flex flex-col gap-8">
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tight leading-tight italic">
                                     {course.title}
                                 </h3>
-                                <p className="text-gray-500 text-sm font-medium line-clamp-2 mb-6 italic opacity-70">
-                                    {course.description}
-                                </p>
+                                <div className="flex items-center gap-6 border-b border-white/5 pb-8">
+                                    <div className="flex items-baseline gap-3">
+                                        <span className="text-3xl font-black text-white">₹{course.price}</span>
+                                        <span className="text-lg text-gray-500 line-through font-bold">₹{Math.round(course.price / 0.66)}</span>
+                                    </div>
+                                    <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+                                        34% off
+                                    </span>
+                                </div>
 
-                                <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-1">Price</p>
-                                        <p className="text-xl font-black">₹{course.price}</p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
-                                        <ChevronRight className="w-5 h-5" />
-                                    </div>
+                                <div className="w-full py-4 bg-white text-black rounded-none font-black text-center text-sm uppercase tracking-widest group-hover:bg-gray-200 transition-all">
+                                    Buy Now
                                 </div>
                             </div>
                         </Link>

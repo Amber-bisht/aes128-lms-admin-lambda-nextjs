@@ -40,7 +40,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             </button>
 
                             <div className="p-10 pt-16">
-                                <div className="space-y-8">
+                                <div className="space-y-10">
+                                    <div className="text-center sm:text-left">
+                                        <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter leading-none mb-2 font-outfit">Sign IN</h2>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Secure access to your learning portal</p>
+                                    </div>
                                     <button
                                         onClick={() => signIn("google", { callbackUrl: window.location.href })}
                                         className="w-full h-14 bg-white border border-gray-200 text-gray-900 rounded-none font-bold flex items-center justify-center gap-4 hover:border-gray-900 hover:bg-gray-50 transition-all"

@@ -190,18 +190,10 @@ export default function CoursePlayerPage() {
                         </div>
 
                         <div className="max-w-5xl space-y-12">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="h-0.5 w-6 bg-blue-600" />
-                                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Module Content</p>
-                            </div>
                             <div>
                                 <h2 className="text-5xl font-bold uppercase tracking-tighter mb-6 text-gray-900 leading-none">
                                     {activeLecture?.title || course.title}
                                 </h2>
-                                <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                                    <span className="flex items-center gap-2">Engineering Content</span>
-                                    <span className="flex items-center gap-2 text-emerald-600">Secure Access</span>
-                                </div>
                             </div>
 
                             <div className="h-px bg-gray-100 w-full" />
@@ -231,30 +223,34 @@ export default function CoursePlayerPage() {
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-10">
                         {Object.entries(groupedLectures).map(([section, lectures], sIdx) => (
                             <div key={section} className="space-y-6">
-                                <h4 className="px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 flex items-center gap-3">
-                                    {section}
-                                </h4>
-                                <div className="space-y-2">
+                                <div className="px-3">
+                                    <div className="flex items-start gap-4 mb-2">
+                                        <span className="text-xl font-bold text-gray-900 leading-none">
+                                            {(sIdx + 1).toString().padStart(2, '0')}
+                                        </span>
+                                        <h4 className="text-sm font-bold text-gray-900 uppercase tracking-tight leading-tight">
+                                            {section}
+                                        </h4>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-10">
+                                        {lectures.length} {lectures.length === 1 ? 'Lesson' : 'Lessons'}
+                                    </p>
+                                </div>
+                                <div className="space-y-1">
                                     {lectures.map((lecture, lIdx) => (
                                         <button
                                             key={lecture.id}
                                             disabled={!isPurchased}
                                             onClick={() => setActiveLecture(lecture)}
-                                            className={`w-full p-4 rounded-none flex items-center gap-5 transition-all text-left group disabled:opacity-40 ${activeLecture?.id === lecture.id ? 'bg-gray-50 border-l-4 border-l-blue-600' : 'hover:bg-gray-50 border-l-4 border-l-transparent'}`}
+                                            className={`w-full py-4 px-3 rounded-none flex items-center gap-4 transition-all text-left group disabled:opacity-40 ${activeLecture?.id === lecture.id ? 'bg-gray-50 border-l-4 border-l-blue-600' : 'hover:bg-gray-50 border-l-4 border-l-transparent'}`}
                                         >
-                                            <div className={`w-8 h-8 flex-shrink-0 rounded-none flex items-center justify-center text-[10px] font-bold transition-all ${activeLecture?.id === lecture.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400 group-hover:bg-gray-100 group-hover:text-blue-600'}`}>
-                                                {(lIdx + 1).toString().padStart(2, '0')}
+                                            <div className="w-6 flex-shrink-0 flex items-center justify-center">
+                                                <PlayCircle className={`w-4 h-4 ${activeLecture?.id === lecture.id ? 'text-blue-600' : 'text-gray-300 group-hover:text-blue-600'}`} />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h4 className={`text-[10px] font-bold uppercase tracking-tight truncate ${activeLecture?.id === lecture.id ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'}`}>
+                                                <h4 className={`text-[11px] font-bold uppercase tracking-tight truncate ${activeLecture?.id === lecture.id ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'}`}>
                                                     {lecture.title}
                                                 </h4>
-                                                {!isPurchased && (
-                                                    <div className="flex items-center gap-1 opacity-50 mt-1">
-                                                        <Lock className="w-2 h-2 text-gray-400" />
-                                                        <span className="text-[7px] font-bold uppercase tracking-widest text-gray-400">Restricted</span>
-                                                    </div>
-                                                )}
                                             </div>
                                         </button>
                                     ))}
