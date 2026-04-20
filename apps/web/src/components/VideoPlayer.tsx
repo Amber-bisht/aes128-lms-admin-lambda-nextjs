@@ -1,8 +1,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { Settings, ShieldAlert } from "lucide-react";
+import { Settings, ShieldAlert, Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import "../styles/video-controls.css";
 
 interface VideoPlayerProps {
     src: string; // URL to m3u8 (Method=NONE)
@@ -160,6 +161,77 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
         };
     }, [src, courseId, lectureId, appToken]);
 
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
+    const [isMuted, setIsMuted] = useState(false);
+    const [showControls, setShowControls] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Auto-hide controls logic
+    const handleMouseMove = () => {
+        setShowControls(true);
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = setTimeout(() => {
+            if (isPlaying) setShowControls(false);
+        }, 3000);
+    };
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const updateTime = () => setCurrentTime(video.currentTime);
+        const updateDuration = () => setDuration(video.duration);
+        const onPlay = () => setIsPlaying(true);
+        const onPause = () => setIsPlaying(false);
+
+        video.addEventListener("timeupdate", updateTime);
+        video.addEventListener("loadedmetadata", updateDuration);
+        video.addEventListener("play", onPlay);
+        video.addEventListener("pause", onPause);
+
+        return () => {
+            video.removeEventListener("timeupdate", updateTime);
+            video.removeEventListener("loadedmetadata", updateDuration);
+            video.removeEventListener("play", onPlay);
+            video.removeEventListener("pause", onPause);
+        };
+    }, []);
+
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (videoRef.current.paused) videoRef.current.play();
+            else videoRef.current.pause();
+        }
+    };
+
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const time = parseFloat(e.target.value);
+        if (videoRef.current) {
+            videoRef.current.currentTime = time;
+            setCurrentTime(time);
+        }
+    };
+
+    const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = parseFloat(e.target.value);
+        setVolume(val);
+        if (videoRef.current) {
+            videoRef.current.volume = val;
+            setIsMuted(val === 0);
+        }
+    };
+
+    const formatTime = (seconds: number) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        return `${h > 0 ? h + ":" : ""}${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+    };
+
     const shadowHostRef = useRef<HTMLDivElement>(null);
     const shadowRootRef = useRef<ShadowRoot | null>(null);
     const [securityViolation, setSecurityViolation] = useState(false);
@@ -297,19 +369,20 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
             container.requestFullscreen().catch(err => {
                 console.error(`Error attempting to enable full-screen mode: ${err.message}`);
             });
+            setIsFullscreen(true);
         } else {
             document.exitFullscreen();
+            setIsFullscreen(false);
         }
     };
 
     return (
         <div 
-            className="relative w-full aspect-video bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100 group"
+            className="relative w-full aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100 group video-container"
             onDoubleClick={toggleFullscreen}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
         >
-            {/* Background mesh for player area */}
-            <div className="absolute inset-0 bg-gradient-mesh opacity-10 z-0 pointer-events-none" />
-            
             {/* Security Violation Overlay */}
             {securityViolation && (
                 <div className="absolute inset-0 z-[100] bg-gray-900 backdrop-blur-xl flex flex-center items-center justify-center p-12 text-center">
@@ -332,53 +405,116 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
                 </div>
             )}
 
-            <video ref={videoRef} controls className="w-full h-full relative z-10" poster="/placeholder-video.jpg" />
+            {/* Video Element (Direct interaction handled by container) */}
+            <video 
+                ref={videoRef} 
+                onClick={togglePlay}
+                className="w-full h-full cursor-pointer"
+                poster="/placeholder-video.jpg"
+                playsInline
+            />
             
             {/* Shadow Host for Watermark */}
-            <div ref={shadowHostRef} className="absolute inset-0 pointer-events-none z-50 animate-shadow-host" />
+            <div ref={shadowHostRef} className="absolute inset-0 pointer-events-none z-50" />
 
-            {/* Custom Quality Settings UI Overlay */}
-            {levels.length > 1 && (
-                <div className="absolute top-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-95 group-hover:scale-100 flex flex-col items-end">
-                    <button 
-                        onClick={() => setShowSettings(!showSettings)}
-                        className="bg-white/90 hover:bg-white backdrop-blur-xl px-4 py-2 text-gray-900 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] flex items-center gap-3 border border-gray-100 rounded-2xl transition-all active:scale-95"
+            {/* Premium Custom Control Bar */}
+            <AnimatePresence>
+                {showControls && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="absolute bottom-0 left-0 right-0 z-50 p-6 pt-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col gap-4 pointer-events-none"
                     >
-                        <Settings className={`w-4 h-4 transition-transform duration-500 ${showSettings ? 'rotate-90 text-blue-600' : 'text-gray-400'}`} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                            {currentLevel === -1 ? 'AUTO' : `${levels.find(l => l.id === currentLevel)?.height}p`}
-                        </span>
-                    </button>
-                    
-                    <AnimatePresence>
-                        {showSettings && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                className="mt-4 bg-white/95 backdrop-blur-2xl border border-gray-100 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] rounded-[2rem] flex flex-col w-48 overflow-hidden p-2"
-                            >
-                                <button
-                                    onClick={() => handleQualitySelect(-1)}
-                                    className={`px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest transition-all rounded-xl mb-1 ${currentLevel === -1 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
-                                >
-                                    Auto Resolution
+                        {/* Progress Bar */}
+                        <div className="flex items-center gap-4 pointer-events-auto">
+                            <input 
+                                type="range"
+                                min="0"
+                                max={duration || 0}
+                                value={currentTime}
+                                onChange={handleSeek}
+                                className="progress-slider"
+                            />
+                        </div>
+
+                        {/* Main Controls Row */}
+                        <div className="flex items-center justify-between pointer-events-auto">
+                            <div className="flex items-center gap-6">
+                                <button onClick={togglePlay} className="control-btn text-white">
+                                    {isPlaying ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white" />}
                                 </button>
-                                {levels.map((level) => (
-                                    <button
-                                        key={level.id}
-                                        onClick={() => handleQualitySelect(level.id)}
-                                        className={`px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-between group/item ${currentLevel === level.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
-                                    >
-                                        <span>{level.height}p</span>
-                                        <span className={`text-[8px] opacity-40 tabular-nums ${currentLevel === level.id ? 'text-white' : 'group-hover/item:text-blue-400'}`}>{(level.bitrate / 1000000).toFixed(1)} Mbps</span>
+                                
+                                <button onClick={() => {
+                                    if (videoRef.current) videoRef.current.currentTime -= 10;
+                                }} className="control-btn text-white/60 hover:text-white">
+                                    <RotateCcw className="w-4 h-4" />
+                                </button>
+
+                                <div className="flex items-center gap-3">
+                                    <button onClick={() => setIsMuted(!isMuted)} className="text-white">
+                                        {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                                     </button>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            )}
+                                    <input 
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.1"
+                                        value={isMuted ? 0 : volume}
+                                        onChange={handleVolume}
+                                        className="volume-slider"
+                                    />
+                                </div>
+
+                                <span className="text-[10px] font-black text-white/50 tabular-nums uppercase tracking-widest">
+                                    {formatTime(currentTime)} <span className="mx-1 text-white/20">/</span> {formatTime(duration)}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                {/* Settings (Quality) */}
+                                {levels.length > 1 && (
+                                    <div className="relative">
+                                        <button 
+                                            onClick={() => setShowSettings(!showSettings)}
+                                            className="video-controls px-4 py-2 text-white flex items-center gap-2 rounded-xl transition-all"
+                                        >
+                                            <Settings className={`w-4 h-4 ${showSettings ? 'rotate-90 text-blue-400' : 'text-white/60'}`} />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">
+                                                {currentLevel === -1 ? 'AUTO' : `${levels.find(l => l.id === currentLevel)?.height}P`}
+                                            </span>
+                                        </button>
+
+                                        {showSettings && (
+                                            <div className="absolute bottom-full right-0 mb-4 video-controls p-2 rounded-2xl flex flex-col w-40">
+                                                <button
+                                                    onClick={() => handleQualitySelect(-1)}
+                                                    className={`px-4 py-3 text-left text-[9px] font-black uppercase tracking-widest rounded-xl mb-1 ${currentLevel === -1 ? 'bg-blue-600 text-white' : 'text-white/50 hover:bg-white/5'}`}
+                                                >
+                                                    Auto Resolution
+                                                </button>
+                                                {levels.map((level) => (
+                                                    <button
+                                                        key={level.id}
+                                                        onClick={() => handleQualitySelect(level.id)}
+                                                        className={`px-4 py-3 text-left text-[9px] font-black uppercase tracking-widest rounded-xl flex items-center justify-between ${currentLevel === level.id ? 'bg-blue-600 text-white' : 'text-white/50 hover:bg-white/5'}`}
+                                                    >
+                                                        <span>{level.height}P</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <button onClick={toggleFullscreen} className="video-controls p-2 text-white rounded-xl">
+                                    {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
