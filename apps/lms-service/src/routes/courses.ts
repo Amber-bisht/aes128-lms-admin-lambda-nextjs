@@ -271,14 +271,31 @@ router.post('/:courseId/lectures/:lectureId/vault-handshake', authenticateJWT, a
             
             const logId = `iplog_${userId}_${currentIp.replace(/[:.]/g, '_')}`;
             
+            // Generate simple Device Fingerprint (Hash of User-Agent)
+            const userAgent = req.headers['user-agent'] || 'unknown';
+            const deviceFingerprint = crypto.createHash('sha256').update(userAgent).digest('hex').slice(0, 16);
+
+            // Extract Geo-location from CloudFront headers
+            const city = req.headers['cloudfront-viewer-city']?.toString();
+            const country = req.headers['cloudfront-viewer-country-name']?.toString();
+
             await prisma.iPLog.upsert({
                 where: { id: logId },
-                update: { lastSeen: new Date() },
+                update: { 
+                    lastSeen: new Date(),
+                    userAgent,
+                    city,
+                    country,
+                    deviceFingerprint
+                },
                 create: {
                     id: logId,
                     userId: userId,
                     ip: currentIp,
-                    userAgent: req.headers['user-agent']
+                    userAgent,
+                    city,
+                    country,
+                    deviceFingerprint
                 }
             });
         } catch (logError) {

@@ -2,7 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  /* config options here */
+  async redirects() {
+    return [
+      {
+        source: '/admin/user',
+        destination: '/admin/users',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

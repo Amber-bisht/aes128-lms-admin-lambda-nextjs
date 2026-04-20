@@ -122,20 +122,45 @@ export default function AdminUsersPage() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <div className="flex flex-col gap-2">
-                                                <div className="flex items-center gap-2 text-gray-500 mb-2">
-                                                    <Globe className="w-3 h-3" />
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest">{[...new Set(user.ipLogs?.map((l: any) => l.ip))].length} Distinct IPs</span>
+                                            <div className="flex flex-col gap-3">
+                                                {/* Geo Location Header */}
+                                                <div className="flex items-center gap-2 text-gray-900 mb-1">
+                                                    <MapPin className="w-3 h-3 text-blue-600" />
+                                                    <span className="text-[10px] font-black uppercase tracking-tight">
+                                                        {user.ipLogs?.[0]?.city || 'Unknown City'}, {user.ipLogs?.[0]?.country || 'Unknown'}
+                                                    </span>
                                                 </div>
-                                                <div className="flex flex-wrap gap-1 max-w-[200px]">
-                                                    {[...new Set(user.ipLogs?.map((l: any) => l.ip))].slice(0, 3).map((ip: any) => (
-                                                        <span key={ip} className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-50 border border-gray-100 text-gray-400 tabular-nums lowercase">
-                                                            {ip}
-                                                        </span>
-                                                    ))}
-                                                    {[...new Set(user.ipLogs?.map((l: any) => l.ip))].length > 3 && (
-                                                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-900 text-white uppercase tracking-widest">+{([...new Set(user.ipLogs?.map((l: any) => l.ip))].length - 3)}</span>
+
+                                                <div className="flex flex-col gap-1.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2 text-gray-500">
+                                                            <Globe className="w-3 h-3" />
+                                                            <span className="text-[9px] font-bold uppercase tracking-widest">{[...new Set(user.ipLogs?.map((l: any) => l.ip))].length} IPs</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-none border border-blue-100">
+                                                            <Shield className="w-2.5 h-2.5" />
+                                                            <span className="text-[8px] font-black uppercase tracking-widest">{[...new Set(user.ipLogs?.filter((l: any) => l.deviceFingerprint).map((l: any) => l.deviceFingerprint))].length || 1} Devices</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Alert if Multi-Country detected */}
+                                                    {[...new Set(user.ipLogs?.filter((l: any) => l.country).map((l: any) => l.country))].length > 1 && (
+                                                        <div className="mt-1 flex items-center gap-2 text-amber-600">
+                                                            <AlertTriangle className="w-3 h-3" />
+                                                            <span className="text-[8px] font-bold uppercase tracking-widest">Multi-Country Access</span>
+                                                        </div>
                                                     )}
+
+                                                    <div className="flex flex-wrap gap-1 mt-2">
+                                                        {[...new Set(user.ipLogs?.map((l: any) => l.ip))].slice(0, 3).map((ip: any) => (
+                                                            <span key={ip} className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-50 border border-gray-100 text-gray-400 tabular-nums lowercase">
+                                                                {ip}
+                                                            </span>
+                                                        ))}
+                                                        {[...new Set(user.ipLogs?.map((l: any) => l.ip))].length > 3 && (
+                                                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-900 text-white uppercase tracking-widest">+{([...new Set(user.ipLogs?.map((l: any) => l.ip))].length - 3)}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>

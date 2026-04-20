@@ -29,13 +29,16 @@ model User {
 }
 
 model IPLog {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  ip        String
-  userAgent String?
-  lastSeen  DateTime @default(now())
-  createdAt DateTime @default(now())
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  ip                String
+  userAgent         String?
+  city              String?
+  country           String?
+  deviceFingerprint String?
+  lastSeen          DateTime @default(now())
+  createdAt         DateTime @default(now())
 
   @@index([userId])
 }
