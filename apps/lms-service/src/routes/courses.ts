@@ -261,28 +261,24 @@ router.post('/:courseId/lectures/:lectureId/vault-handshake', authenticateJWT, a
         const serverECDH = crypto.createECDH('prime256v1');
         const serverPublicKey = serverECDH.generateKeys();
 
-        // 4. Log IP and User Agent for Multi-IP Tracking
-        const currentIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        if (currentIp) {
+        // 4. Log IP and User Agent for Multi-IP Tracking (Safe Block)
+        try {
+            const currentIp = (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown").toString();
+            const logId = `iplog_${userId}_${currentIp.replace(/[:.]/g, '_')}`;
+            
             await prisma.iPLog.upsert({
-                where: { id: `iplog_${userId}_${currentIp}` }, // We'll need a unique constraint or just create a new one
+                where: { id: logId },
                 update: { lastSeen: new Date() },
                 create: {
-                   // id: `iplog_${userId}_${currentIp}`,
+                    id: logId,
                     userId: userId,
-                    ip: currentIp.toString(),
+                    ip: currentIp,
                     userAgent: req.headers['user-agent']
                 }
-            }).catch(e => {
-                // If id constraint fails, just create a new record
-                return prisma.iPLog.create({
-                    data: {
-                        userId: userId,
-                        ip: currentIp.toString(),
-                        userAgent: req.headers['user-agent']
-                    }
-                });
             });
+        } catch (logError) {
+            console.error('IP Logging Error (Non-fatal):', logError);
+            // We don't throw here so the user can still watch the video
         }
 
         // Compute shared secret using client's public key (hex)

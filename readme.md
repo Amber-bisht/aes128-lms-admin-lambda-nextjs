@@ -15,12 +15,17 @@ The system is designed as a hybrid-cloud environment, leveraging the best of VPS
 
 ```mermaid
 graph TD
-    User((User/Student)) -->|HTTPS| CF[AWS CloudFront CDN]
-    CF -->|Signed URLs| S3_PUB[S3 Processed Bucket]
-    User -->|API Requests| GW[API Gateway Proxy]
+    User((User/Student)) -->|1. Auth| GW[API Gateway Proxy]
     GW --> LMS[LMS Core Service]
-    GW --> STD[Student Service]
     
+    subgraph AMBER Security Layer
+        User <-->|2. ECDH Handshake| LMS
+        User -->|3. Signed URL| CF[AWS CloudFront CDN]
+        CF -->|4. Encrypted Segments| S3_PUB[S3 Processed Bucket]
+        User -->|5. WASM Decryption| Worker[Web Worker Thread]
+        Worker -->|6. Security Flags| LMS
+    end
+
     Admin((Instructor/Admin)) -->|Upload MP4| S3_RAW[S3 Raw Bucket]
     S3_RAW -->|S3 Event| Lambda[AWS Lambda Video Processor]
     Lambda -->|Transcode & Encrypt| S3_PUB
@@ -29,14 +34,14 @@ graph TD
 
 ---
 
-### AMBER Architecture 
-To prevent unauthorized downloading and redistribution, the system implements a production-grade 
-**AMBER** architecture:
+To deter unauthorized downloading and redistribution, the system implements a production-grade 
+**content protection architecture (DRM-inspired, cost-efficient alternative)**:
 
 1.  **ECDH Handshake**: Uses **Elliptic Curve Diffie-Hellman** to establish a session-specific shared secret. The actual AES key is never sent over the wire in plain text; it is encrypted using this ephemeral secret, making network capture impossible.
-2.  **AssemblyScript WASM Protection**: Core key derivation logic is compiled into a binary **WebAssembly (WASM)** module. This provides an opaque execution layer that is resistant to DevTools inspection and reverse-engineering.
+2.  **AssemblyScript WASM Protection**: Core key derivation logic is compiled into a binary **WebAssembly (WASM)** module. This provides an opaque execution layer that **raises the barrier against casual reverse-engineering** and DevTools inspection.
 3.  **HLS Segment Encryption**: Individual `.ts` segments are encrypted using AES-CBC and decrypted on-the-fly in a **Worker Thread**.
-4.  **Behavioral Analysis**: The worker monitors fetching patterns. If a mass download attempt is detected (Rapid Fetching), it silenly flags the user account.
+4.  **Dynamic Watermarking**: Injects the student's email as a moving, semi-transparent overlay. It shifts positions every 45 seconds, **deterring screen recording and enabling forensic tracing of leaks**.
+5.  **Behavioral Analysis**: The worker monitors fetching patterns. If a mass download attempt is detected (Rapid Fetching), it silenly flags the user account.
 
 ### Secured Content Delivery & Monitoring
 -   **Multi-IP Tracking**: Every student session logs unique IP addresses and user agents to identify and flag potential account sharing.
