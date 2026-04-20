@@ -154,51 +154,65 @@ router.get('/:id', async (req: Request, res: Response) => {
             isPurchased = (user?.courses.length || 0) > 0 || user?.role === 'ADMIN';
         }
 
-        // If purchased, fetch full lecture details (with video URLs)
-        if (isPurchased) {
-            const fullLectures = await prisma.lecture.findMany({
-                where: { courseId: course.id },
-                orderBy: { order: 'asc' },
-                include: { videoAsset: true }
-            });
-
-            // Sign the video URLs using only the object key
-            const signedLectures = fullLectures.map(lecture => {
-                const rawVideoUrl = lecture.videoAsset?.videoUrl || lecture.videoUrl;
-                if (!rawVideoUrl) return lecture;
-
-                // Extract key from URL (everything after the domain)
-                let key = rawVideoUrl;
-                try {
-                    const url = new URL(rawVideoUrl);
-                    key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
-                    // Auto-Correct raw S3 Path-Style URLs
-                    if (key.startsWith('lms.amberbisht/')) key = key.replace('lms.amberbisht/', '');
-                } catch (e) {
-                    // Fallback to original if not a valid URL
-                }
-
-                // Append the fully signed CloudFront URL to the videoAsset layer
-                const signedUrl = getSignedVideoUrl(key);
-
-                return {
-                    ...lecture,
-                    videoUrl: signedUrl,
-                    videoAsset: lecture.videoAsset ? {
-                        ...lecture.videoAsset,
-                        videoUrl: signedUrl
-                    } : null
-                };
-            });
-
-            return res.json({ ...course, lectures: signedLectures, purchased: true });
-        }
-
-        // If not purchased, return limited details
-        res.json({ ...course, purchased: false });
+        // Return course and limited lecture metadata
+        res.json({ ...course, purchased: isPurchased });
     } catch (error) {
         console.error('Fetch Course Error:', error);
         res.status(500).json({ error: 'Failed to fetch course' });
+    }
+});
+
+// GET /api/v1/lms/courses/:courseId/lectures/:lectureId/play-info
+router.get('/:courseId/lectures/:lectureId/play-info', authenticateJWT, async (req: any, res: Response) => {
+    const { courseId, lectureId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        // 1. Verify Enrollment
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                courses: { where: { id: courseId } }
+            }
+        });
+
+        const isPurchased = (user?.courses.length || 0) > 0 || user?.role === 'ADMIN';
+        if (!isPurchased) {
+            return res.status(403).json({ error: 'You are not enrolled in this course' });
+        }
+
+        // 2. Fetch Lecture with Video Asset
+        const lecture = await prisma.lecture.findFirst({
+            where: { 
+                id: lectureId,
+                courseId: courseId
+            },
+            include: { videoAsset: true }
+        });
+
+        if (!lecture) return res.status(404).json({ error: 'Lecture not found' });
+
+        const rawVideoUrl = lecture.videoAsset?.videoUrl || lecture.videoUrl;
+        if (!rawVideoUrl) return res.status(404).json({ error: 'Video not found for this lecture' });
+
+        // 3. Sign Video URL
+        let key = rawVideoUrl;
+        try {
+            const url = new URL(rawVideoUrl);
+            key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+            if (key.startsWith('lms.amberbisht/')) key = key.replace('lms.amberbisht/', '');
+        } catch (e) {}
+
+        const signedUrl = getSignedVideoUrl(key);
+
+        res.json({
+            videoUrl: signedUrl,
+            encryptionKey: lecture.videoAsset?.encryptionKey || lecture.encryptionKey,
+            iv: lecture.videoAsset?.iv || lecture.iv
+        });
+    } catch (error) {
+        console.error('Play Info Error:', error);
+        res.status(500).json({ error: 'Failed to fetch play information' });
     }
 });
 

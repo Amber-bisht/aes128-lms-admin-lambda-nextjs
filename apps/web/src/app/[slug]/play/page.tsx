@@ -16,7 +16,28 @@ export default function CoursePlayerPage() {
     const { data: session, status } = useSession();
     const [course, setCourse] = useState<Course | null>(null);
     const [activeLecture, setActiveLecture] = useState<Lecture | null>(null);
+    const [playInfo, setPlayInfo] = useState<{ videoUrl: string; encryptionKey: string; iv: string } | null>(null);
     const [purchasing, setPurchasing] = useState(false);
+    const [loadingPlayInfo, setLoadingPlayInfo] = useState(false);
+
+    const isPurchased = course?.purchased || (session?.user as any)?.role === 'ADMIN';
+
+    useEffect(() => {
+        if (activeLecture && course && isPurchased && session) {
+            setLoadingPlayInfo(true);
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${course.id}/lectures/${activeLecture.id}/play-info`, {
+                headers: { "Authorization": `Bearer ${(session as any).appToken}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.videoUrl) {
+                        setPlayInfo(data);
+                    }
+                })
+                .catch(err => console.error("Error fetching play info:", err))
+                .finally(() => setLoadingPlayInfo(false));
+        }
+    }, [activeLecture, course, isPurchased, session]);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -96,7 +117,6 @@ export default function CoursePlayerPage() {
         </div>
     );
 
-    const isPurchased = course.purchased || (session?.user as any)?.role === 'ADMIN';
 
     // Grouping logic for sections
     const groupedLectures: Record<string, Lecture[]> = {};
@@ -157,11 +177,22 @@ export default function CoursePlayerPage() {
                         <div className="aspect-video bg-gray-50 rounded-none overflow-hidden border border-gray-100 shadow-2xl relative mb-16 ring-1 ring-gray-100">
                             {isPurchased ? (
                                 activeLecture ? (
-                                    <VideoPlayer
-                                        src={((activeLecture as any).videoAsset?.videoUrl || activeLecture.videoUrl || "").replace('https://lms.amberbisht.s3.amazonaws.com/', 'https://s3.eu-west-1.amazonaws.com/lms.amberbisht/')}
-                                        encryptionKey={(activeLecture as any).videoAsset?.encryptionKey || (activeLecture as any).encryptionKey || ""}
-                                        iv={(activeLecture as any).videoAsset?.iv || (activeLecture as any).iv || ""}
-                                    />
+                                    loadingPlayInfo ? (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                            <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+                                            <p className="mt-4 text-gray-400 font-bold uppercase tracking-widest text-[10px]">Loading Video...</p>
+                                        </div>
+                                    ) : playInfo ? (
+                                        <VideoPlayer
+                                            src={playInfo.videoUrl.replace('https://lms.amberbisht.s3.amazonaws.com/', 'https://s3.eu-west-1.amazonaws.com/lms.amberbisht/')}
+                                            encryptionKey={playInfo.encryptionKey || ""}
+                                            iv={playInfo.iv || ""}
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
+                                            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Failed to load video</p>
+                                        </div>
+                                    )
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
                                         <PlayCircle className="w-16 h-16 text-gray-100 mb-8" />

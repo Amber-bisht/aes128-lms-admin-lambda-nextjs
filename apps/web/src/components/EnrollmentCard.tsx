@@ -16,8 +16,40 @@ export default function EnrollmentCard({ course }: EnrollmentCardProps) {
     const router = useRouter();
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [purchasing, setPurchasing] = useState(false);
+    const [isPurchased, setIsPurchased] = useState(course.purchased || (session?.user as any)?.role === 'ADMIN');
+    const [loadingEnrollment, setLoadingEnrollment] = useState(false);
 
-    const isPurchased = course.purchased || (session?.user as any)?.role === 'ADMIN';
+    useEffect(() => {
+        const checkEnrollment = async () => {
+            if (status === "authenticated" && !isPurchased) {
+                setLoadingEnrollment(true);
+                try {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${course.slug}`, {
+                        headers: { "Authorization": `Bearer ${(session as any).appToken}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.purchased) {
+                            setIsPurchased(true);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to check enrollment status", error);
+                } finally {
+                    setLoadingEnrollment(false);
+                }
+            }
+        };
+
+        checkEnrollment();
+    }, [session, status, course.slug, isPurchased]);
+
+    // Update isPurchased when course prop changes or session role is ADMIN
+    useEffect(() => {
+        if (course.purchased || (session?.user as any)?.role === 'ADMIN') {
+            setIsPurchased(true);
+        }
+    }, [course.purchased, session]);
 
     const handleAction = async () => {
         if (status === "unauthenticated") {
