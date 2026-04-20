@@ -29,7 +29,7 @@ graph TD
 
 ---
 
-### AMBER Architecture (Better than DRM)
+### AMBER Architecture 
 To prevent unauthorized downloading and redistribution, the system implements a production-grade 
 **AMBER** architecture:
 
