@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Users, Mail, Shield, BookOpen, ChevronLeft, Loader2, Calendar } from "lucide-react";
+import { Users, Mail, Shield, BookOpen, ChevronLeft, Loader2, Calendar, AlertTriangle, Globe, MapPin } from "lucide-react";
 
 export default function AdminUsersPage() {
     const { data: session, status } = useSession();
@@ -84,6 +84,8 @@ export default function AdminUsersPage() {
                             <thead>
                                 <tr className="border-b border-gray-100 bg-gray-50">
                                     <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">User Profile</th>
+                                    <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Security</th>
+                                    <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Access History</th>
                                     <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Clearance</th>
                                     <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Courses</th>
                                     <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Joined</th>
@@ -100,6 +102,40 @@ export default function AdminUsersPage() {
                                                         <Mail className="w-3 h-3" />
                                                         <span className="text-[10px] font-bold uppercase tracking-widest">{user.email}</span>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-6">
+                                            <div className="flex flex-col gap-2">
+                                                {user.flags?.length > 0 ? (
+                                                    <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-none">
+                                                        <AlertTriangle className="w-3 h-3" />
+                                                        <span className="text-[9px] font-bold uppercase tracking-widest">{user.flags[0].type}</span>
+                                                        <span className="text-[7px] font-bold bg-red-600 text-white px-1.5 py-0.5 rounded-none">{user.flags.length}</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-gray-300 border border-gray-50 px-3 py-2 rounded-none opacity-50">
+                                                        <Shield className="w-3 h-3" />
+                                                        <span className="text-[9px] font-bold uppercase tracking-widest">Clear</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-6">
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-2 text-gray-500 mb-2">
+                                                    <Globe className="w-3 h-3" />
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest">{[...new Set(user.ipLogs?.map((l: any) => l.ip))].length} Distinct IPs</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                                    {[...new Set(user.ipLogs?.map((l: any) => l.ip))].slice(0, 3).map((ip: any) => (
+                                                        <span key={ip} className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-50 border border-gray-100 text-gray-400 tabular-nums lowercase">
+                                                            {ip}
+                                                        </span>
+                                                    ))}
+                                                    {[...new Set(user.ipLogs?.map((l: any) => l.ip))].length > 3 && (
+                                                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-900 text-white uppercase tracking-widest">+{([...new Set(user.ipLogs?.map((l: any) => l.ip))].length - 3)}</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>

@@ -6,13 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface VideoPlayerProps {
     src: string; // URL to m3u8 (Method=NONE)
-    encryptionKey: string; // Hex
-    iv: string; // Hex
+    courseId: string;
+    lectureId: string;
+    appToken: string;
 }
 
-export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps) {
+export default function VideoPlayer({ src, courseId, lectureId, appToken }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
+    const workerRef = useRef<Worker | null>(null);
     const [levels, setLevels] = useState<{ id: number; height: number; bitrate: number }[]>([]);
     const [currentLevel, setCurrentLevel] = useState<number>(-1); // -1 = Auto
     const [showSettings, setShowSettings] = useState(false);
@@ -45,37 +47,52 @@ export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps
                         };
                     }
 
-                    // If it's a segment (ts) and we have keys, decrypt it
+                    // If it's a segment (ts), use our worker
                     if (context.responseType === 'arraybuffer' && (context.url.includes('.ts') || context.url.endsWith('.ts'))) {
-                        // Offload to Worker
-                        const worker = new Worker('/decryption.worker.js');
-
-                        worker.postMessage({
-                            chunkUrl: context.url,
-                            keyHex: encryptionKey,
-                            ivHex: iv,
-                            id: context.url
-                        });
-
-                        worker.onmessage = (e) => {
-                            if (e.data.error) {
-                                callbacks.onError({ code: 500, text: e.data.error }, context);
-                            } else {
-                                callbacks.onSuccess({
-                                    url: context.url,
-                                    data: e.data.decryptedBuffer
-                                }, { trequest: performance.now(), tfirst: 0, tload: 0 }, context);
-                            }
-                            worker.terminate();
-                        };
-
-                        worker.onerror = (err) => {
-                            callbacks.onError({ code: 500, text: "Worker Error" }, context);
-                            worker.terminate();
+                        if (!workerRef.current) {
+                            workerRef.current = new Worker('/decryption.worker.js');
+                            // Send initialization data once
+                            workerRef.current.postMessage({
+                                type: 'INIT',
+                                config: {
+                                    apiUrl: process.env.NEXT_PUBLIC_API_URL,
+                                    courseId,
+                                    lectureId,
+                                    appToken
+                                }
+                            });
                         }
 
-                        // Cancel handler
-                        this.abort = () => worker.terminate();
+                        const worker = workerRef.current;
+                        const requestId = context.url;
+
+                        const handleMessage = (e: any) => {
+                            if (e.data.id === requestId) {
+                                if (e.data.error) {
+                                    callbacks.onError({ code: 500, text: e.data.error }, context);
+                                } else {
+                                    callbacks.onSuccess({
+                                        url: context.url,
+                                        data: e.data.decryptedBuffer
+                                    }, { trequest: performance.now(), tfirst: 0, tload: 0 }, context);
+                                }
+                                // We don't terminate the worker, we keep it for the session
+                                worker.removeEventListener('message', handleMessage);
+                            }
+                        };
+
+                        worker.addEventListener('message', handleMessage);
+                        worker.postMessage({
+                            type: 'DECRYPT_SEGMENT',
+                            payload: {
+                                chunkUrl: context.url,
+                                id: requestId
+                            }
+                        });
+
+                        this.abort = () => {
+                            // worker.removeEventListener('message', handleMessage);
+                        };
                     } else {
                         // Default behavior for playlist/manifest
                         super.load(context, config, callbacks);
@@ -121,8 +138,11 @@ export default function VideoPlayer({ src, encryptionKey, iv }: VideoPlayerProps
             if (hlsRef.current) {
                 hlsRef.current.destroy();
             }
+            if (workerRef.current) {
+                workerRef.current.terminate();
+            }
         };
-    }, [src, encryptionKey, iv]);
+    }, [src, courseId, lectureId, appToken]);
 
     const handleQualitySelect = (levelId: number) => {
         if (hlsRef.current) {

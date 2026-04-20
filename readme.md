@@ -29,26 +29,28 @@ graph TD
 
 ---
 
-## 🔒 Security & Content Protection
+### AMBER Architecture (Better than DRM)
+To prevent unauthorized downloading and redistribution, the system implements a production-grade 
+**AMBER** architecture:
 
-### AES-128 bit Encryption (Serverless)
-To prevent unauthorized downloading and redistribution of premium course content, the system implements a state-of-the-art encryption flow:
+1.  **ECDH Handshake**: Uses **Elliptic Curve Diffie-Hellman** to establish a session-specific shared secret. The actual AES key is never sent over the wire in plain text; it is encrypted using this ephemeral secret, making network capture impossible.
+2.  **AssemblyScript WASM Protection**: Core key derivation logic is compiled into a binary **WebAssembly (WASM)** module. This provides an opaque execution layer that is resistant to DevTools inspection and reverse-engineering.
+3.  **HLS Segment Encryption**: Individual `.ts` segments are encrypted using AES-CBC and decrypted on-the-fly in a **Worker Thread**.
+4.  **Behavioral Analysis**: The worker monitors fetching patterns. If a mass download attempt is detected (Rapid Fetching), it silenly flags the user account.
 
-1.  **Serverless Processing**: Upon upload, an **AWS Lambda** function pulls the raw video and uses **FFmpeg** to transcode it into HLS (HTTP Live Streaming) segments.
-2.  **Unique Keys**: Every video is encrypted with a unique **16-byte random AES-128 key** and IV (Initialization Vector).
-3.  **HLS Segment Encryption**: Individual `.ts` segments are encrypted using AES-CBC.
-4.  **Web Worker Decryption**: The Next.js frontend utilizes a custom `hls.js` loader that offloads decryption logic to a **Web Worker**, ensuring smooth playback without blocking the main UI thread.
-
-### Secured Content Delivery
--   **2-Bucket S3 Model**: Separation of concerns between `Raw` (input) and `Processed` (output) buckets. Both buckets are private and not accessible via public URLs.
--   **AWS CloudFront CDN**: Content is delivered globally through CloudFront.
--   **Signed URLs**: Video segments are served via CloudFront Signed URLs, ensuring that only authenticated students with active enrollments can access the HLS stream.
+### Secured Content Delivery & Monitoring
+-   **Multi-IP Tracking**: Every student session logs unique IP addresses and user agents to identify and flag potential account sharing.
+-   **Security Admin Console**: Real-time visibility into flagged users, rapid download attempts, and access history via the Admin Dashboard.
+-   **Signed URLs**: Video segments are served via CloudFront Signed URLs with time-bound credentials.
 
 ---
 
 ## 🚀 Key Features
 
 -   **Next.js 16 Frontend**: A premium, sharp-edged (cube-like) UI built for speed and SEO.
+-   **AMBER Handshake**: Per-session ECDH key exchange to prevent key extraction.
+-   **WASM Decryption**: Hardened binary decryption layer for maximum protection.
+-   **Anti-Piracy Dashboard**: Real-time flagging of mass-download attempts and account sharing.
 -   **Microservices Backend**: Decoupled services for LMS logic, Student management, and Authentication.
 -   **HLS Video Player**: Custom-built player with manual AES decryption for maximum security.
 -   **Razorpay Integration**: Seamless payment processing for course enrollments.
@@ -88,4 +90,4 @@ To prevent unauthorized downloading and redistribution of premium course content
 
 ---
 
-Developed with ❤️ by [Amber Bisht](https://github.com/Amber-bisht)
+Developed by [Amber Bisht](https://github.com/Amber-bisht)

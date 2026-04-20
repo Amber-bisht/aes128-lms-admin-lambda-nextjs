@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticateJWT } from '../middleware/auth';
 import { getSignedVideoUrl } from '../services/cloudfront';
+import crypto from 'crypto';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -213,6 +214,126 @@ router.get('/:courseId/lectures/:lectureId/play-info', authenticateJWT, async (r
     } catch (error) {
         console.error('Play Info Error:', error);
         res.status(500).json({ error: 'Failed to fetch play information' });
+    }
+// POST /api/v1/lms/courses/:courseId/lectures/:lectureId/vault-handshake
+router.post('/:courseId/lectures/:lectureId/vault-handshake', authenticateJWT, async (req: any, res: Response) => {
+    const { courseId, lectureId } = req.params;
+    const { clientPublicKey } = req.body;
+    const userId = req.user.id;
+
+    if (!clientPublicKey) {
+        return res.status(400).json({ error: 'Client public key is required' });
+    }
+
+    try {
+        // 1. Verify Enrollment
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                courses: { where: { id: courseId } }
+            }
+        });
+
+        const isPurchased = (user?.courses.length || 0) > 0 || user?.role === 'ADMIN';
+        if (!isPurchased) {
+            return res.status(403).json({ error: 'You are not enrolled in this course' });
+        }
+
+        // 2. Fetch Lecture
+        const lecture = await prisma.lecture.findFirst({
+            where: { id: lectureId, courseId: courseId },
+            include: { videoAsset: true }
+        });
+
+        if (!lecture) return res.status(404).json({ error: 'Lecture not found' });
+
+        const rawVideoUrl = lecture.videoAsset?.videoUrl || lecture.videoUrl;
+        const encryptionKey = lecture.videoAsset?.encryptionKey || lecture.encryptionKey;
+        const iv = lecture.videoAsset?.iv || lecture.iv;
+
+        if (!rawVideoUrl || !encryptionKey || !iv) {
+            return res.status(404).json({ error: 'Video or encryption data missing' });
+        }
+
+        // 3. Perform ECDH Handshake
+        const serverECDH = crypto.createECDH('prime256v1');
+        const serverPublicKey = serverECDH.generateKeys();
+
+        // 4. Log IP and User Agent for Multi-IP Tracking
+        const currentIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        if (currentIp) {
+            await prisma.iPLog.upsert({
+                where: { id: `iplog_${userId}_${currentIp}` }, // We'll need a unique constraint or just create a new one
+                update: { lastSeen: new Date() },
+                create: {
+                   // id: `iplog_${userId}_${currentIp}`,
+                    userId: userId,
+                    ip: currentIp.toString(),
+                    userAgent: req.headers['user-agent']
+                }
+            }).catch(e => {
+                // If id constraint fails, just create a new record
+                return prisma.iPLog.create({
+                    data: {
+                        userId: userId,
+                        ip: currentIp.toString(),
+                        userAgent: req.headers['user-agent']
+                    }
+                });
+            });
+        }
+
+        // Compute shared secret using client's public key (hex)
+        const sharedSecret = serverECDH.computeSecret(Buffer.from(clientPublicKey, 'hex'));
+
+        // Derive a 256-bit key from shared secret for vault encryption
+        const vaultKey = crypto.createHash('sha256').update(sharedSecret).digest();
+
+        // 4. Encrypt the actual Video AES Key using the vaultKey (AES-256-GCM)
+        const vaultIv = crypto.randomBytes(12);
+        const cipher = crypto.createCipheriv('aes-256-gcm', vaultKey, vaultIv);
+        
+        // Prepare the payload (the real AES key and IV)
+        const payload = JSON.stringify({
+            key: encryptionKey,
+            iv: iv
+        });
+
+        let encryptedPayload = cipher.update(payload, 'utf8', 'hex');
+        encryptedPayload += cipher.final('hex');
+        const authTag = cipher.getAuthTag().toString('hex');
+
+        res.json({
+            serverPublicKey: serverPublicKey.toString('hex'),
+            vaultIv: vaultIv.toString('hex'),
+            authTag: authTag,
+            encryptedPackage: encryptedPayload
+        });
+
+    } catch (error) {
+        console.error('Vault Handshake Error:', error);
+        res.status(500).json({ error: 'Failed to perform secure handshake' });
+    }
+});
+
+// POST /api/v1/lms/security/flag
+router.post('/security/flag', authenticateJWT, async (req: any, res: Response) => {
+    const { type, severity, metadata } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const flag = await prisma.securityFlag.create({
+            data: {
+                userId,
+                type,
+                severity: severity || 'MEDIUM',
+                metadata: metadata || {}
+            }
+        });
+        res.json({ success: true, flagId: flag.id });
+    } catch (error) {
+        console.error('Security Flag Error:', error);
+        res.status(500).json({ error: 'Failed to record security incident' });
     }
 });
 

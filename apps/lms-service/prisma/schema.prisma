@@ -22,8 +22,34 @@ model User {
   email     String   @unique
   role      Role     @default(USER)
   courses   Course[] @relation("UserCourses")
+  ipLogs    IPLog[]
+  flags     SecurityFlag[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model IPLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  ip        String
+  userAgent String?
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SecurityFlag {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // e.g. RAPID_DOWNLOAD, MULTI_IP
+  severity  String   // LOW, MEDIUM, HIGH
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Course {

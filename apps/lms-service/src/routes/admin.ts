@@ -190,6 +190,17 @@ router.get('/users', async (req: Request, res: Response) => {
                         title: true,
                         slug: true
                     }
+                },
+                ipLogs: {
+                    select: {
+                        ip: true,
+                        userAgent: true,
+                        lastSeen: true
+                    },
+                    orderBy: { lastSeen: 'desc' }
+                },
+                flags: {
+                    orderBy: { createdAt: 'desc' }
                 }
             },
             orderBy: { createdAt: 'desc' }

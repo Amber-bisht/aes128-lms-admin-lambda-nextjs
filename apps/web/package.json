@@ -20,10 +20,12 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@assemblyscript/loader": "^0.28.14",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "assemblyscript": "^0.28.14",
     "autoprefixer": "^10.4.23",
     "eslint": "^9",
     "eslint-config-next": "16.1.2",
