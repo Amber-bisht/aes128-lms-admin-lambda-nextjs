@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { Settings } from "lucide-react";
+import { Settings, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VideoPlayerProps {
@@ -160,6 +160,108 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
         };
     }, [src, courseId, lectureId, appToken]);
 
+    const shadowHostRef = useRef<HTMLDivElement>(null);
+    const shadowRootRef = useRef<ShadowRoot | null>(null);
+    const [securityViolation, setSecurityViolation] = useState(false);
+
+    // Hardened Watermark Guard (Shadow DOM + MutationObserver)
+    useEffect(() => {
+        if (!userEmail || !shadowHostRef.current) return;
+
+        // 1. Initialize Closed Shadow Root if not exists
+        if (!shadowRootRef.current) {
+            try {
+                // 'closed' mode makes it unreachable from document.querySelector in standard scripts
+                shadowRootRef.current = shadowHostRef.current.attachShadow({ mode: 'closed' });
+            } catch (e) {
+                // Already attached or unsupported
+            }
+        }
+
+        const shadow = shadowRootRef.current;
+        if (!shadow) return;
+
+        // 2. Initial Render of Shadow Content
+        const renderShadow = () => {
+            shadow.innerHTML = `
+                <style>
+                    .watermark-wrapper {
+                        position: absolute;
+                        pointer-events: none;
+                        user-select: none;
+                        z-index: 9999;
+                        transition: all 2s ease-in-out;
+                        top: ${watermarkPos.top};
+                        left: ${watermarkPos.left};
+                        transform: translate(-50%, -50%);
+                        opacity: 0.12;
+                    }
+                    .content {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        transform: rotate(-12deg);
+                        font-family: sans-serif;
+                    }
+                    .email {
+                        font-size: 10px;
+                        font-weight: 900;
+                        text-transform: uppercase;
+                        letter-spacing: 0.2em;
+                        color: #111827;
+                        white-space: nowrap;
+                    }
+                    .id {
+                        font-size: 8px;
+                        font-weight: 700;
+                        color: #9ca3af;
+                        margin-top: 4px;
+                        text-transform: uppercase;
+                    }
+                </style>
+                <div class="watermark-wrapper">
+                    <div class="content">
+                        <span class="email">${userEmail}</span>
+                        <span class="id">SECURE PLAYBACK ID: ${appToken.slice(-8)}</span>
+                    </div>
+                </div>
+            `;
+        };
+
+        renderShadow();
+
+        // 3. Mutation Observer to detect Tampering (Hiding/Deleting Watermark)
+        const observer = new MutationObserver((mutations) => {
+            let violation = false;
+            mutations.forEach(mutation => {
+                // If shadow host is removed or hidden
+                if (mutation.type === 'childList') {
+                    const hostFound = Array.from(shadowHostRef.current?.parentElement?.children || []).includes(shadowHostRef.current!);
+                    if (!hostFound) violation = true;
+                }
+                if (mutation.type === 'attributes') {
+                    const style = window.getComputedStyle(shadowHostRef.current!);
+                    if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) < 0.05) {
+                        violation = true;
+                    }
+                }
+            });
+
+            if (violation) {
+                setSecurityViolation(true);
+                if (videoRef.current) videoRef.current.pause();
+                console.warn('CRITICAL: Watermark manipulation detected. Playback suspended.');
+            }
+        });
+
+        observer.observe(shadowHostRef.current, { attributes: true, childList: true });
+        if (shadowHostRef.current.parentElement) {
+            observer.observe(shadowHostRef.current.parentElement, { childList: true });
+        }
+
+        return () => observer.disconnect();
+    }, [userEmail, watermarkPos, appToken]);
+
     const handleQualitySelect = (levelId: number) => {
         if (hlsRef.current) {
             hlsRef.current.currentLevel = levelId;
@@ -173,8 +275,33 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
             {/* Background mesh for player area */}
             <div className="absolute inset-0 bg-gradient-mesh opacity-10 z-0 pointer-events-none" />
             
+            {/* Security Violation Overlay */}
+            {securityViolation && (
+                <div className="absolute inset-0 z-[100] bg-gray-900 backdrop-blur-xl flex flex-center items-center justify-center p-12 text-center">
+                    <div className="max-w-md">
+                        <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-900/20">
+                            <ShieldAlert className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-4">Security Violation</h2>
+                        <p className="text-gray-400 text-sm leading-relaxed mb-8">
+                            Playback has been suspended due to unexpected client-side manipulation. 
+                            Please deactivate all browser extensions or DevTools scripts and refresh the page to continue.
+                        </p>
+                        <button 
+                            onClick={() => window.location.reload()}
+                            className="bg-white text-gray-900 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
+                        >
+                            Retry & Refresh
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <video ref={videoRef} controls className="w-full h-full relative z-10" poster="/placeholder-video.jpg" />
             
+            {/* Shadow Host for Watermark */}
+            <div ref={shadowHostRef} className="absolute inset-0 pointer-events-none z-50 animate-shadow-host" />
+
             {/* Custom Quality Settings UI Overlay */}
             {levels.length > 1 && (
                 <div className="absolute top-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-95 group-hover:scale-100 flex flex-col items-end">
@@ -216,24 +343,6 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
                         )}
                     </AnimatePresence>
                 </div>
-            )}
-
-            {/* Dynamic Watermark Overlay */}
-            {userEmail && (
-                <motion.div
-                    animate={{ top: watermarkPos.top, left: watermarkPos.left }}
-                    transition={{ duration: 2, ease: "easeInOut" }}
-                    className="absolute pointer-events-none z-20 select-none hidden md:block"
-                >
-                    <div className="flex flex-col items-center opacity-[0.12] -rotate-12">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-900 whitespace-nowrap">
-                            {userEmail}
-                        </span>
-                        <span className="text-[8px] font-bold text-gray-400 mt-1 uppercase tracking-tighter">
-                            SECURE PLAYBACK ID: {appToken.slice(-8)}
-                        </span>
-                    </div>
-                </motion.div>
             )}
         </div>
     );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Users, Mail, Shield, BookOpen, ChevronLeft, Loader2, Calendar, AlertTriangle, Globe, MapPin } from "lucide-react";
+import { Users, Mail, Shield, BookOpen, ChevronLeft, Loader2, Calendar, AlertTriangle, Globe, MapPin, Smartphone, Monitor, Activity, ShieldCheck, ShieldAlert } from "lucide-react";
 
 export default function AdminUsersPage() {
     const { data: session, status } = useSession();
@@ -122,47 +122,62 @@ export default function AdminUsersPage() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <div className="flex flex-col gap-3">
-                                                {/* Geo Location Header */}
-                                                <div className="flex items-center gap-2 text-gray-900 mb-1">
-                                                    <MapPin className="w-3 h-3 text-blue-600" />
-                                                    <span className="text-[10px] font-black uppercase tracking-tight">
-                                                        {user.ipLogs?.[0]?.city || 'Unknown City'}, {user.ipLogs?.[0]?.country || 'Unknown'}
-                                                    </span>
-                                                </div>
+                                            {(() => {
+                                                const uniqueDevices = [...new Set(user.ipLogs?.filter((l: any) => l.deviceFingerprint).map((l: any) => l.deviceFingerprint))].length || 1;
+                                                const uniqueCountries = [...new Set(user.ipLogs?.filter((l: any) => l.country).map((l: any) => l.country))].length || 1;
+                                                const uniqueIPs = [...new Set(user.ipLogs?.map((l: any) => l.ip))].length || 1;
+                                                const hasFlags = user.flags?.length > 0;
 
-                                                <div className="flex flex-col gap-1.5">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 text-gray-500">
-                                                            <Globe className="w-3 h-3" />
-                                                            <span className="text-[9px] font-bold uppercase tracking-widest">{[...new Set(user.ipLogs?.map((l: any) => l.ip))].length} IPs</span>
+                                                let risk = "LOW";
+                                                if (uniqueCountries > 1 || uniqueDevices > 2 || hasFlags) risk = "HIGH";
+                                                else if (uniqueDevices === 2 || uniqueIPs > 3) risk = "MEDIUM";
+
+                                                const riskColors = {
+                                                    LOW: "text-emerald-600 bg-emerald-50 border-emerald-100",
+                                                    MEDIUM: "text-amber-600 bg-amber-50 border-amber-100",
+                                                    HIGH: "text-red-600 bg-red-50 border-red-100"
+                                                };
+
+                                                const isMobile = user.ipLogs?.[0]?.userAgent?.toLowerCase().includes('mobile');
+
+                                                return (
+                                                    <div className="flex flex-col gap-3">
+                                                        {/* Risk Badge */}
+                                                        <div className={`flex items-center gap-2 w-fit px-3 py-1 rounded-none border border-dashed font-black text-[9px] uppercase tracking-widest ${riskColors[risk as keyof typeof riskColors]}`}>
+                                                            {risk === "HIGH" ? <ShieldAlert className="w-3 h-3" /> : risk === "MEDIUM" ? <Activity className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+                                                            {risk} RISK PULSE
                                                         </div>
-                                                        <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-none border border-blue-100">
-                                                            <Shield className="w-2.5 h-2.5" />
-                                                            <span className="text-[8px] font-black uppercase tracking-widest">{[...new Set(user.ipLogs?.filter((l: any) => l.deviceFingerprint).map((l: any) => l.deviceFingerprint))].length || 1} Devices</span>
+
+                                                        {/* Geo & Device Breakdown */}
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <div className="flex items-center gap-2 text-gray-900">
+                                                                <MapPin className="w-3 h-3 text-blue-600" />
+                                                                <span className="text-[10px] font-bold uppercase tracking-tight">
+                                                                    {user.ipLogs?.[0]?.city || 'Unknown City'}, {user.ipLogs?.[0]?.country || 'Unknown'}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-4 text-gray-500">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {isMobile ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
+                                                                    <span className="text-[9px] font-bold uppercase tracking-widest">{uniqueDevices} Device{uniqueDevices > 1 ? 's' : ''}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 border-l border-gray-100 pl-4">
+                                                                    <Globe className="w-3 h-3" />
+                                                                    <span className="text-[9px] font-bold uppercase tracking-widest">{uniqueIPs} IP Addr</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {uniqueCountries > 1 && (
+                                                                <div className="flex items-center gap-1.5 text-red-500 font-bold uppercase text-[7px] tracking-widest mt-1">
+                                                                    <AlertTriangle className="w-2 h-2" />
+                                                                    Geographic Anomaly Detected
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
-
-                                                    {/* Alert if Multi-Country detected */}
-                                                    {[...new Set(user.ipLogs?.filter((l: any) => l.country).map((l: any) => l.country))].length > 1 && (
-                                                        <div className="mt-1 flex items-center gap-2 text-amber-600">
-                                                            <AlertTriangle className="w-3 h-3" />
-                                                            <span className="text-[8px] font-bold uppercase tracking-widest">Multi-Country Access</span>
-                                                        </div>
-                                                    )}
-
-                                                    <div className="flex flex-wrap gap-1 mt-2">
-                                                        {[...new Set(user.ipLogs?.map((l: any) => l.ip))].slice(0, 3).map((ip: any) => (
-                                                            <span key={ip} className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-50 border border-gray-100 text-gray-400 tabular-nums lowercase">
-                                                                {ip}
-                                                            </span>
-                                                        ))}
-                                                        {[...new Set(user.ipLogs?.map((l: any) => l.ip))].length > 3 && (
-                                                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-none bg-gray-900 text-white uppercase tracking-widest">+{([...new Set(user.ipLogs?.map((l: any) => l.ip))].length - 3)}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-3 text-gray-400">
