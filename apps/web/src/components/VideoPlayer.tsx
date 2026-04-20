@@ -208,14 +208,14 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
                             font-weight: 900;
                             text-transform: uppercase;
                             letter-spacing: 0.2em;
-                            color: rgba(255, 255, 255, 0.5);
+                            color: rgba(255, 255, 255, 1);
                             white-space: nowrap;
-                            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
                         }
                         .id {
                             font-size: 8px;
                             font-weight: 700;
-                            color: rgba(255, 255, 255, 0.4);
+                            color: rgba(255, 255, 255, 0.8);
                             margin-top: 4px;
                             text-transform: uppercase;
                         }
@@ -231,10 +231,20 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
 
             renderShadow();
 
-            // Handle Fullscreen visibility
+            // Handle Fullscreen visibility & Override
             const handleFullscreenChange = () => {
+                const container = shadowHostRef.current?.parentElement;
+                if (!container) return;
+
+                // If the video element itself went full screen (native button), force it to the container instead
+                if (document.fullscreenElement === videoRef.current) {
+                    document.exitFullscreen().then(() => {
+                        container.requestFullscreen();
+                    });
+                }
+
                 if (document.fullscreenElement) {
-                    shadowHostRef.current?.style.setProperty('z-index', '2147483647'); // Max z-index for full screen
+                    shadowHostRef.current?.style.setProperty('z-index', '2147483647');
                 }
             };
             document.addEventListener('fullscreenchange', handleFullscreenChange);
