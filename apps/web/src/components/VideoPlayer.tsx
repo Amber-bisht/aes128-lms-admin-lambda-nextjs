@@ -9,15 +9,31 @@ interface VideoPlayerProps {
     courseId: string;
     lectureId: string;
     appToken: string;
+    userEmail?: string;
 }
 
-export default function VideoPlayer({ src, courseId, lectureId, appToken }: VideoPlayerProps) {
+export default function VideoPlayer({ src, courseId, lectureId, appToken, userEmail }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
     const workerRef = useRef<Worker | null>(null);
     const [levels, setLevels] = useState<{ id: number; height: number; bitrate: number }[]>([]);
     const [currentLevel, setCurrentLevel] = useState<number>(-1); // -1 = Auto
     const [showSettings, setShowSettings] = useState(false);
+    const [watermarkPos, setWatermarkPos] = useState({ top: '20%', left: '20%' });
+
+    // Watermark Movement Logic
+    useEffect(() => {
+        if (!userEmail) return;
+
+        const moveWatermark = () => {
+            const top = Math.floor(Math.random() * 70 + 10) + '%';
+            const left = Math.floor(Math.random() * 70 + 10) + '%';
+            setWatermarkPos({ top, left });
+        };
+
+        const interval = setInterval(moveWatermark, 45000); // Move every 45s
+        return () => clearInterval(interval);
+    }, [userEmail]);
 
     useEffect(() => {
         if (Hls.isSupported() && videoRef.current) {
@@ -200,6 +216,24 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken }: Vide
                         )}
                     </AnimatePresence>
                 </div>
+            )}
+
+            {/* Dynamic Watermark Overlay */}
+            {userEmail && (
+                <motion.div
+                    animate={{ top: watermarkPos.top, left: watermarkPos.left }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
+                    className="absolute pointer-events-none z-20 select-none hidden md:block"
+                >
+                    <div className="flex flex-col items-center opacity-[0.12] -rotate-12">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-900 whitespace-nowrap">
+                            {userEmail}
+                        </span>
+                        <span className="text-[8px] font-bold text-gray-400 mt-1 uppercase tracking-tighter">
+                            SECURE PLAYBACK ID: {appToken.slice(-8)}
+                        </span>
+                    </div>
+                </motion.div>
             )}
         </div>
     );

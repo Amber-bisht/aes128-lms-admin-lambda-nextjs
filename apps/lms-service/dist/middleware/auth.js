@@ -10,6 +10,11 @@ const authenticateJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader) {
         const token = authHeader.split(' ')[1];
+        // Server-to-Server Lambda Bypass
+        if (token === process.env.ADMIN_SERVICE_TOKEN) {
+            req.user = { role: 'ADMIN', id: 'system', email: 'system@lambda' };
+            return next();
+        }
         jsonwebtoken_1.default.verify(token, JWT_SECRET, (err, user) => {
             if (err) {
                 return res.sendStatus(403);

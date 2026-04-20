@@ -187,7 +187,8 @@ export default function CoursePlayerPage() {
                                             src={playInfo.videoUrl.replace('https://lms.amberbisht.s3.amazonaws.com/', 'https://s3.eu-west-1.amazonaws.com/lms.amberbisht/')}
                                             courseId={course.id}
                                             lectureId={activeLecture.id}
-                                            appToken={(session as any).appToken}
+                                            appToken={(session as any)?.appToken}
+                                            userEmail={session?.user?.email || undefined}
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">

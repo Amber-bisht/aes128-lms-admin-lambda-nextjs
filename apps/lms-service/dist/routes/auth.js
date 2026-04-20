@@ -33,14 +33,15 @@ router.post('/google', (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         const { email, sub } = payload; // 'sub' is the Google User ID
         // Upsert User
-        // Note: In real app, you might want to ask role or default to USER.
-        // For this project, we might manually set ADMIN in DB for specific emails.
+        const isAdmin = email === 'chankyafoundation14@gmail.com';
         const user = yield prisma.user.upsert({
             where: { email },
-            update: {},
+            update: {
+                role: isAdmin ? 'ADMIN' : undefined
+            },
             create: {
                 email,
-                role: 'USER', // Default role
+                role: isAdmin ? 'ADMIN' : 'USER',
             },
         });
         // Generate Application JWT

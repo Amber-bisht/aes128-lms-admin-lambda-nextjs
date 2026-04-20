@@ -215,6 +215,8 @@ router.get('/:courseId/lectures/:lectureId/play-info', authenticateJWT, async (r
         console.error('Play Info Error:', error);
         res.status(500).json({ error: 'Failed to fetch play information' });
     }
+});
+
 // POST /api/v1/lms/courses/:courseId/lectures/:lectureId/vault-handshake
 router.post('/:courseId/lectures/:lectureId/vault-handshake', authenticateJWT, async (req: any, res: Response) => {
     const { courseId, lectureId } = req.params;
