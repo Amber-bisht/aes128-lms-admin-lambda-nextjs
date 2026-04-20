@@ -203,34 +203,43 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
                         transform: rotate(-12deg);
                         font-family: sans-serif;
                     }
-                    .email {
-                        font-size: 10px;
-                        font-weight: 900;
-                        text-transform: uppercase;
-                        letter-spacing: 0.2em;
-                        color: #111827;
-                        white-space: nowrap;
-                    }
-                    .id {
-                        font-size: 8px;
-                        font-weight: 700;
-                        color: #9ca3af;
-                        margin-top: 4px;
-                        text-transform: uppercase;
-                    }
-                </style>
-                <div class="watermark-wrapper">
-                    <div class="content">
-                        <span class="email">${userEmail}</span>
-                        <span class="id">SECURE PLAYBACK ID: ${appToken.slice(-8)}</span>
+                        .email {
+                            font-size: 10px;
+                            font-weight: 900;
+                            text-transform: uppercase;
+                            letter-spacing: 0.2em;
+                            color: rgba(255, 255, 255, 0.5);
+                            white-space: nowrap;
+                            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                        }
+                        .id {
+                            font-size: 8px;
+                            font-weight: 700;
+                            color: rgba(255, 255, 255, 0.4);
+                            margin-top: 4px;
+                            text-transform: uppercase;
+                        }
+                    </style>
+                    <div class="watermark-wrapper">
+                        <div class="content">
+                            <span class="email">${userEmail}</span>
+                            <span class="id">SECURE PLAYBACK ID: ${appToken.slice(-8)}</span>
+                        </div>
                     </div>
-                </div>
-            `;
-        };
+                `;
+            };
 
-        renderShadow();
+            renderShadow();
 
-        // 3. Mutation Observer to detect Tampering (Hiding/Deleting Watermark)
+            // Handle Fullscreen visibility
+            const handleFullscreenChange = () => {
+                if (document.fullscreenElement) {
+                    shadowHostRef.current?.style.setProperty('z-index', '2147483647'); // Max z-index for full screen
+                }
+            };
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+            // 3. Mutation Observer to detect Tampering
         const observer = new MutationObserver((mutations) => {
             let violation = false;
             mutations.forEach(mutation => {
@@ -270,8 +279,24 @@ export default function VideoPlayer({ src, courseId, lectureId, appToken, userEm
         }
     };
 
+    const toggleFullscreen = () => {
+        const container = shadowHostRef.current?.parentElement;
+        if (!container) return;
+
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
     return (
-        <div className="relative w-full aspect-video bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100 group">
+        <div 
+            className="relative w-full aspect-video bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100 group"
+            onDoubleClick={toggleFullscreen}
+        >
             {/* Background mesh for player area */}
             <div className="absolute inset-0 bg-gradient-mesh opacity-10 z-0 pointer-events-none" />
             
