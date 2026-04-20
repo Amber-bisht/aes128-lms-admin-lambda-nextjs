@@ -207,9 +207,7 @@ router.get('/:courseId/lectures/:lectureId/play-info', authenticateJWT, async (r
         const signedUrl = getSignedVideoUrl(key);
 
         res.json({
-            videoUrl: signedUrl,
-            encryptionKey: lecture.videoAsset?.encryptionKey || lecture.encryptionKey,
-            iv: lecture.videoAsset?.iv || lecture.iv
+            videoUrl: signedUrl
         });
     } catch (error) {
         console.error('Play Info Error:', error);
