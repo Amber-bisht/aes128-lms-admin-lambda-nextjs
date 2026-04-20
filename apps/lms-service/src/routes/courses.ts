@@ -261,7 +261,14 @@ router.post('/:courseId/lectures/:lectureId/vault-handshake', authenticateJWT, a
 
         // 4. Log IP and User Agent for Multi-IP Tracking (Safe Block)
         try {
-            const currentIp = (req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown").toString();
+            const currentIp = (
+                req.headers['cf-connecting-ip'] || 
+                req.headers['x-forwarded-for'] || 
+                req.ip || 
+                req.socket.remoteAddress || 
+                "unknown"
+            ).toString().split(',')[0].trim(); // Get the first IP if it's a comma-separated list
+            
             const logId = `iplog_${userId}_${currentIp.replace(/[:.]/g, '_')}`;
             
             await prisma.iPLog.upsert({

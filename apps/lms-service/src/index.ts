@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 const app = express();
+app.set('trust proxy', true); // Trust proxy headers for real client IP
 const PORT = process.env.PORT || 5002;
 
 app.use(cors({

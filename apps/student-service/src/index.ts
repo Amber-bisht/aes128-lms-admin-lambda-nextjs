@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', true);
 const prisma = new PrismaClient();
 const PORT = process.env.STUDENT_SERVICE_PORT || 5003;
 
