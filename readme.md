@@ -1,4 +1,4 @@
-# AES-128 LMS: Enterprise-Grade Serverless Learning Management System
+# AES-128 LMS: Pro Level Serverless Learning Management System
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20S3%20%7C%20CloudFront-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
