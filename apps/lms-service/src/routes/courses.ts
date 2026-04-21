@@ -16,7 +16,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
 const extractKey = (urlStr: string) => {
     try {
         const url = new URL(urlStr);
-        return url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+        let key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+        
+        // Remove bucket name from path if it's there (e.g., s3.amazonaws.com/bucket-name/key)
+        // Also handles your specific bucket names
+        if (key.startsWith('lms.amberbisht1/')) key = key.replace('lms.amberbisht1/', '');
+        if (key.startsWith('lms.amberbisht/')) key = key.replace('lms.amberbisht/', '');
+        
+        return key;
     } catch (e) {
         return urlStr;
     }
@@ -197,13 +204,7 @@ router.get('/:courseId/lectures/:lectureId/play-info', authenticateJWT, async (r
         if (!rawVideoUrl) return res.status(404).json({ error: 'Video not found for this lecture' });
 
         // 3. Sign Video URL
-        let key = rawVideoUrl;
-        try {
-            const url = new URL(rawVideoUrl);
-            key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
-            if (key.startsWith('lms.amberbisht/')) key = key.replace('lms.amberbisht/', '');
-        } catch (e) {}
-
+        const key = extractKey(rawVideoUrl);
         const signedUrl = getSignedVideoUrl(key);
 
         res.json({
