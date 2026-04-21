@@ -2407,8 +2407,8 @@ var require_capabilities = __commonJS({
     var filterRegexp = /^(?: [T\.][S\.][C\.] )?([^ ]+) +(AA?|VV?|\|)->(AA?|VV?|\|) +(.*)$/;
     var cache5 = {};
     module2.exports = function(proto) {
-      proto.setFfmpegPath = function(ffmpegPath) {
-        cache5.ffmpegPath = ffmpegPath;
+      proto.setFfmpegPath = function(ffmpegPath2) {
+        cache5.ffmpegPath = ffmpegPath2;
         return this;
       };
       proto.setFfprobePath = function(ffprobePath) {
@@ -35912,6 +35912,25 @@ var import_path = __toESM(require("path"));
 var import_crypto = __toESM(require("crypto"));
 var import_client_s3 = __toESM(require_dist_cjs71());
 var s32 = new import_client_s3.S3Client({ region: process.env.AWS_REGION });
+var findFFmpeg = (dir) => {
+  try {
+    const files = import_fs.default.readdirSync(dir);
+    for (const file of files) {
+      const fullPath = import_path.default.join(dir, file);
+      if (import_fs.default.statSync(fullPath).isDirectory()) {
+        const found = findFFmpeg(fullPath);
+        if (found) return found;
+      } else if (file === "ffmpeg") {
+        return fullPath;
+      }
+    }
+  } catch (e5) {
+  }
+  return null;
+};
+var ffmpegPath = findFFmpeg("/opt") || "/opt/bin/ffmpeg";
+console.log("Final FFmpeg path determined to be:", ffmpegPath);
+import_fluent_ffmpeg.default.setFfmpegPath(ffmpegPath);
 var processVideo = async (fileKey, videoId) => {
   const workDir = import_path.default.join("/tmp", videoId);
   if (!import_fs.default.existsSync(workDir)) import_fs.default.mkdirSync(workDir);

@@ -7,6 +7,34 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 
+// Set FFmpeg path for AWS Lambda Layer compatibility
+const findFFmpeg = (dir: string): string | null => {
+    try {
+        console.log(`Searching directory: ${dir}`);
+        const files = fs.readdirSync(dir);
+        console.log(`Files in ${dir}:`, files);
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
+            const stats = fs.statSync(fullPath);
+            if (stats.isDirectory()) {
+                const found = findFFmpeg(fullPath);
+                if (found) return found;
+            } else if (file === 'ffmpeg') {
+                console.log(`SUCCESS: Found ffmpeg binary at ${fullPath}`);
+                return fullPath;
+            }
+        }
+    } catch (e: any) {
+        console.error(`Error reading directory ${dir}:`, e.message);
+    }
+    return null;
+};
+
+console.log('--- STARTING FFMPEG DISCOVERY ---');
+const ffmpegPath = findFFmpeg('/opt') || '/opt/bin/ffmpeg';
+console.log('Final FFmpeg path determined to be:', ffmpegPath);
+ffmpeg.setFfmpegPath(ffmpegPath);
+
 export const processVideo = async (fileKey: string, videoId: string): Promise<{ key: string; iv: string; playlistUrl: string }> => {
     const workDir = path.join('/tmp', videoId);
     if (!fs.existsSync(workDir)) fs.mkdirSync(workDir);
