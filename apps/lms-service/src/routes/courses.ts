@@ -18,14 +18,27 @@ const extractKey = (urlStr: string) => {
         const url = new URL(urlStr);
         let key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
         
-        // Remove bucket name from path if it's there (e.g., s3.amazonaws.com/bucket-name/key)
-        // Also handles your specific bucket names
-        if (key.startsWith('lms.amberbisht1/')) key = key.replace('lms.amberbisht1/', '');
-        if (key.startsWith('lms.amberbisht/')) key = key.replace('lms.amberbisht/', '');
+        // Remove bucket name or CloudFront domain from the beginning of the path
+        const prefixesToStrip = [
+            'lms.amberbisht1/',
+            'lms.amberbisht/',
+            'd11uikgztul9r3.cloudfront.net/',
+            'https://d11uikgztul9r3.cloudfront.net/'
+        ];
+
+        for (const prefix of prefixesToStrip) {
+            if (key.startsWith(prefix)) {
+                key = key.replace(prefix, '');
+            }
+        }
         
         return key;
     } catch (e) {
-        return urlStr;
+        // If it's not a valid URL, it might already be a key
+        let key = urlStr;
+        if (key.startsWith('https://')) key = key.replace('https://', '');
+        if (key.startsWith('d11uikgztul9r3.cloudfront.net/')) key = key.replace('d11uikgztul9r3.cloudfront.net/', '');
+        return key;
     }
 };
 
