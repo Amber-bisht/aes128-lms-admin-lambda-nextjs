@@ -11,11 +11,12 @@ const s3 = new S3Client({
     }
 });
 
-export const generateUploadUrl = async (key: string, contentType: string, bucket?: string) => {
+export const generateUploadUrl = async (key: string, contentType: string, bucket?: string, metadata?: Record<string, string>) => {
     const command = new PutObjectCommand({
         Bucket: bucket || process.env.S3_BUCKET_RAW,
         Key: key,
-        ContentType: contentType
+        ContentType: contentType,
+        Metadata: metadata
     });
 
     return getSignedUrl(s3, command, { expiresIn: 3600 });

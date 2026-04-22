@@ -135,14 +135,15 @@ router.post('/courses/:courseId/lectures', async (req: Request, res: Response) =
 
 // Get Upload URL for Video or Image
 router.post('/upload-url', async (req: Request, res: Response) => {
-    const { filename, contentType, type } = req.body; // type: 'course-image' or 'lecture-video'
+    const { filename, contentType, type, name } = req.body; // type: 'course-image' or 'lecture-video'
     const ext = filename.split('.').pop();
     const key = `${type}s/${uuidv4()}.${ext}`;
 
     const bucket = type === 'course-image' ? process.env.S3_BUCKET_PUBLIC : process.env.S3_BUCKET_RAW;
+    const metadata = name ? { name } : undefined;
 
     try {
-        const url = await generateUploadUrl(key, contentType, bucket);
+        const url = await generateUploadUrl(key, contentType, bucket, metadata);
         res.json({ url, key });
     } catch (error) {
         console.error(error);
@@ -253,12 +254,24 @@ router.delete('/lectures/:id', async (req: Request, res: Response) => {
 router.get('/videos', async (req: Request, res: Response) => {
     try {
         const assets = await prisma.videoAsset.findMany({
-            where: { lecture: null },
+            include: { lecture: { select: { id: true, title: true } } },
             orderBy: { createdAt: 'desc' }
         });
         res.json(assets);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch video assets' });
+    }
+});
+
+// DELETE /admin/videos/:id - Remove video asset
+router.delete('/videos/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        await prisma.videoAsset.delete({ where: { id: id as string } });
+        res.json({ message: 'Video asset deleted' });
+    } catch (error) {
+        console.error('Delete Video Error:', error);
+        res.status(500).json({ error: 'Failed to delete video asset' });
     }
 });
 

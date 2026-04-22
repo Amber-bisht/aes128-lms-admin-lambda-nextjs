@@ -22,6 +22,13 @@ export const handler = async (event: any) => {
         const videoId = key.split('/').pop()?.split('.')[0];
         if (!videoId) throw new Error("Could not extract videoId from key");
 
+        // 1.5 Fetch S3 Metadata for Video Name
+        const { HeadObjectCommand } = await import('@aws-sdk/client-s3');
+        const s3 = new (await import('@aws-sdk/client-s3')).S3Client({ region: process.env.AWS_REGION });
+        const metadataResponse = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+        const videoName = metadataResponse.Metadata?.name || "Processed Video";
+        console.log(`Video name from metadata: ${videoName}`);
+
         // 2. Process Video (Transcode + Generate Unique Keys)
         const result = await processVideo(key, videoId);
 
@@ -42,6 +49,7 @@ export const handler = async (event: any) => {
             },
             body: JSON.stringify({
                 videoId: videoId,
+                name: videoName,
                 videoUrl: result.playlistUrl,
                 encryptionKey: result.key, // Unique Hex Key
                 iv: result.iv,             // Unique Hex VI

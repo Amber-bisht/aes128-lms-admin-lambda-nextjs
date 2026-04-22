@@ -82,6 +82,7 @@ export const processVideo = async (fileKey: string, videoId: string): Promise<{ 
             .outputOptions([
                 '-vf scale=-2:1080',
                 '-c:v libx264',
+                '-preset veryfast',
                 '-b:v 3000k',
                 '-maxrate 3200k',
                 '-bufsize 6000k',
@@ -97,6 +98,7 @@ export const processVideo = async (fileKey: string, videoId: string): Promise<{ 
             .outputOptions([
                 '-vf scale=-2:480',
                 '-c:v libx264',
+                '-preset veryfast',
                 '-b:v 800k',
                 '-maxrate 850k',
                 '-bufsize 1200k',

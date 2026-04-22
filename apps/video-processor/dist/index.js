@@ -35914,20 +35914,26 @@ var import_client_s3 = __toESM(require_dist_cjs71());
 var s32 = new import_client_s3.S3Client({ region: process.env.AWS_REGION });
 var findFFmpeg = (dir) => {
   try {
+    console.log(`Searching directory: ${dir}`);
     const files = import_fs.default.readdirSync(dir);
+    console.log(`Files in ${dir}:`, files);
     for (const file of files) {
       const fullPath = import_path.default.join(dir, file);
-      if (import_fs.default.statSync(fullPath).isDirectory()) {
+      const stats = import_fs.default.statSync(fullPath);
+      if (stats.isDirectory()) {
         const found = findFFmpeg(fullPath);
         if (found) return found;
       } else if (file === "ffmpeg") {
+        console.log(`SUCCESS: Found ffmpeg binary at ${fullPath}`);
         return fullPath;
       }
     }
   } catch (e5) {
+    console.error(`Error reading directory ${dir}:`, e5.message);
   }
   return null;
 };
+console.log("--- STARTING FFMPEG DISCOVERY ---");
 var ffmpegPath = findFFmpeg("/opt") || "/opt/bin/ffmpeg";
 console.log("Final FFmpeg path determined to be:", ffmpegPath);
 import_fluent_ffmpeg.default.setFfmpegPath(ffmpegPath);
@@ -35966,6 +35972,7 @@ ${iv}`);
     (0, import_fluent_ffmpeg.default)(inputPath).output(import_path.default.join(dir1080p, "output.m3u8")).outputOptions([
       "-vf scale=-2:1080",
       "-c:v libx264",
+      "-preset veryfast",
       "-b:v 3000k",
       "-maxrate 3200k",
       "-bufsize 6000k",
@@ -35978,6 +35985,7 @@ ${iv}`);
     ]).output(import_path.default.join(dir480p, "output.m3u8")).outputOptions([
       "-vf scale=-2:480",
       "-c:v libx264",
+      "-preset veryfast",
       "-b:v 800k",
       "-maxrate 850k",
       "-bufsize 1200k",
@@ -36042,6 +36050,11 @@ var handler = async (event) => {
     console.log(`Processing file from bucket: ${bucket}, key: ${key}`);
     const videoId = key.split("/").pop()?.split(".")[0];
     if (!videoId) throw new Error("Could not extract videoId from key");
+    const { HeadObjectCommand } = await Promise.resolve().then(() => __toESM(require_dist_cjs71()));
+    const s33 = new (await Promise.resolve().then(() => __toESM(require_dist_cjs71()))).S3Client({ region: process.env.AWS_REGION });
+    const metadataResponse = await s33.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+    const videoName = metadataResponse.Metadata?.name || "Processed Video";
+    console.log(`Video name from metadata: ${videoName}`);
     const result = await processVideo(key, videoId);
     console.log("Processing complete. Updating DB...", result);
     let apiBase = process.env.API_URL;
@@ -36057,6 +36070,7 @@ var handler = async (event) => {
       },
       body: JSON.stringify({
         videoId,
+        name: videoName,
         videoUrl: result.playlistUrl,
         encryptionKey: result.key,
         // Unique Hex Key
